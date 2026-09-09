@@ -154,19 +154,20 @@ details.acc[open]>summary .chev{transform:rotate(-135deg) translateY(-2px)}
 /* ---- NEW §4.5: Delivery block body ---- */
 .dlv-prod{margin-bottom:14px}
 .dlv-prod b{color:var(--ink)}
-.zip{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px}
-.zip label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
-.zip input{width:120px;height:44px;border:1px solid var(--rule-strong);border-radius:4px;padding:0 12px;font:inherit;font-size:16px;color:var(--ink)}
-.zip .btn-outline{height:44px;border:1px solid var(--navy);background:#fff;color:var(--navy);border-radius:4px;padding:0 16px;font-size:14px;font-weight:700}
-.zip .btn-outline:hover{background:var(--gray-bg)}
+/* X21: ZIP shares the quantity-input component (14/700 label, 18/700 ink value); grey border = "secondary input" variant */
+.zip{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px}
+.zip .lab{display:block;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.zip input{display:block;width:140px;border:1px solid var(--rule-strong);border-radius:4px;padding:8px 12px;font:inherit;font-size:18px;font-weight:700;color:var(--ink);background:#fff;line-height:1.4}
 .zip-status{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:20px}
+/* X10 / X17: sentence-case headers; cells styled as cells; price column right-aligned, tabular figures */
 .dlv-t{width:100%;border-collapse:collapse;font-size:16px}
-.dlv-t th{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule)}
+.dlv-t th{font-size:13px;font-weight:700;color:var(--ink);text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule)}
+.dlv-t th.rng{text-align:right}
 .dlv-t td{padding:10px 12px;border-bottom:1px solid var(--rule);color:var(--ink);vertical-align:top}
-.dlv-t tr:last-child td{border-bottom:0}
-.dlv-t td.opt{font-weight:700}
-.dlv-t td.rng{color:var(--body);white-space:nowrap}
+.dlv-t td.oname{font-weight:700}
+.dlv-t td.rng{color:var(--body);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
 .dlv-fn{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5}
+.nw{white-space:nowrap}
 
 /* ============================================================
    BUY BOX — production idiom (Tailwind classes translated 1:1)
@@ -175,9 +176,10 @@ details.acc[open]>summary .chev{transform:rotate(-135deg) translateY(-2px)}
 .bb-sku{font-size:13px;color:var(--muted)}
 .bb-h1{font-size:24px;line-height:32px;font-weight:700;color:var(--ink);margin-top:8px}
 .bb-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-/* NEW §4.5: text badge — same .badge idiom as "3 methods"; it is a button that focuses the selector */
-.badge-btn{cursor:pointer}
-.badge-btn:hover{text-decoration:underline;border-color:var(--navy)}
+/* X19 §4.5: the production yellow filled "RUSH ORDER" badge (image, 20px tall) carried as a text badge; the button is the hit area */
+.badge-btn{background:none;border:0;padding:0;cursor:pointer;display:inline-flex;align-items:center}
+.badge-rush{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:3px;background:#FFD400;color:var(--navy);font-size:13px;font-weight:700;line-height:20px;white-space:nowrap}
+.badge-btn:hover .badge-rush{text-decoration:underline}
 .bb-tag{margin-top:12px;border-left:3px solid var(--orange);padding-left:12px;color:var(--ink);line-height:1.5}
 .bb-desc{margin-top:12px;color:var(--body)}
 .bb-setup{margin-top:24px}
@@ -226,6 +228,7 @@ a.tbtn{display:inline-block}
 .card .nm{color:var(--ink)}
 .card.on .nm{font-weight:700}
 .card .pill{display:inline-block;border:1px solid var(--rule-strong);border-radius:999px;padding:2px 8px;font-size:13px;color:var(--ink);white-space:nowrap;margin-left:6px;line-height:1.4}
+.card .pill.muted{color:var(--muted)}
 .card .ds{display:block;margin-top:3px;font-size:13px;line-height:1.45;color:var(--muted)}
 /* NEW §4.4: locked method card — same card idiom, selected state, not a control */
 .card.locked{cursor:default}
@@ -253,38 +256,46 @@ a.tbtn{display:inline-block}
 .imp .cost{white-space:nowrap;color:var(--muted)}
 .imp .cost b{color:var(--ink)}
 .upl-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-/* NEW §4.4: primary-styled upload under Rush — solid navy, never orange (orange = primary CTA only) */
-.btn-navy{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:4px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;padding:0 16px;text-align:left;line-height:1.3}
-.btn-navy:hover{background:#0A2560}
+/* X2: ONE secondary action style — navy 1px outline, 44px, 15/700 navy, 4px. Used by the Rush upload trigger,
+   dialog Done / Choose a file / Cancel / Close, Update dates, Continue shopping, View cart, Upload artwork (band). */
+.btn-2{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--navy);border-radius:4px;background:#fff;color:var(--navy);font-size:15px;font-weight:700;padding:0 16px;text-align:left;line-height:1.3}
+.btn-2:hover{background:var(--gray-bg)}
 .recv{font-size:13px;color:var(--in-stock);font-weight:700;margin-top:6px;line-height:1.5}
 .recv .fn{color:var(--ink)}
 .addloc{margin-bottom:16px}
 
 /* ---- NEW §4.3: Production & delivery selector ---- */
 .pd{margin-bottom:16px}
-.pd-h{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px}
+/* X22: section heading, not a field label */
+.pd-h{font-size:16px;font-weight:700;color:var(--ink);margin:12px 0 8px}
 .pd fieldset{border:0;padding:0;margin:0;min-width:0}
 .pd fieldset legend{padding:0}
-.opt{display:block;border:1px solid var(--rule);border-radius:4px;background:#fff;padding:10px 12px;cursor:pointer;transition:border-color .15s,background .15s}
+/* X12: .opt is a div; the label (radio + name + fee + dates + helper) and the timeline are siblings inside it */
+.opt{display:block;border:1px solid var(--rule);border-radius:4px;background:#fff;padding:12px;transition:border-color .15s,background .15s}
 .opt+.opt{margin-top:8px}
 .opt:hover{border-color:var(--rule-strong);background:var(--surface)}
 .opt.on,.opt.on:hover{border-color:var(--orange);background:var(--wash)}
+.opt label{display:block;cursor:pointer}
 .opt .top{display:flex;align-items:center;gap:8px}
 .opt input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--orange)}
 .opt .tier-nm{font-size:16px;font-weight:700;color:var(--ink)}
-.opt .fee{margin-left:auto;font-size:14px;color:var(--body);white-space:nowrap}
+.opt .fee{margin-left:auto;font-size:14px;color:var(--body);white-space:nowrap;font-variant-numeric:tabular-nums}
 .opt .dates{display:block;margin:4px 0 0 24px;font-size:16px;color:var(--ink);line-height:1.5}
 .opt .dates b{font-weight:700}
+.opt .dates .d2lead{display:none}
 .opt .help{display:block;margin:2px 0 0 24px;font-size:13px;color:var(--muted);line-height:1.5}
-.tl{margin:12px 0 0 24px;border-top:1px solid var(--rule);padding-top:12px}
-.tl h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+/* X14–X16: compact timeline — 14px body prose, plain "1." numerals, 8px between steps */
+.tl{margin:8px 0 0;border-top:1px solid var(--rule);padding-top:8px}
+.tl h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.45}
 .tl ol{margin:0;padding:0;list-style:none;counter-reset:st}
-.tl li{position:relative;padding-left:26px;font-size:16px;line-height:1.5;color:var(--ink);margin-bottom:6px;counter-increment:st}
-.tl li::before{content:counter(st);position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.tl li b{font-weight:700}
-.tl .cd{color:var(--ink);font-weight:700}
-.tl .ln{font-size:13px;color:var(--muted);line-height:1.5;margin-top:8px}
-.tl .ln+.ln{margin-top:4px}
+.tl li{position:relative;padding-left:20px;font-size:14px;line-height:1.45;color:var(--body);margin-bottom:8px;counter-increment:st}
+.tl li:last-child{margin-bottom:0}
+.tl li::before{content:counter(st) ".";position:absolute;left:0;top:0;font-size:13px;line-height:20px;font-weight:700;color:var(--muted)}
+.tl li b{font-weight:700;color:var(--ink)}
+.tl .cd{font-size:13px;font-weight:400;color:var(--muted)}
+.tl .cd b{color:var(--muted)}
+.tl .ln{font-size:13px;color:var(--muted);line-height:1.45;margin-top:6px}
+.tl .ln+.ln{margin-top:2px}
 .tl .ln.recvd{color:var(--in-stock);font-weight:700}
 /* NEW §4.3 non-rush products: one line, no cards */
 .pd-line{font-size:16px;color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;line-height:1.5}
@@ -293,7 +304,7 @@ a.tbtn{display:inline-block}
 /* subtotal — production: border-l-[3px] border-secondary py-1 pl-3 */
 .subtotal{border-left:3px solid var(--orange);padding:4px 0 4px 12px;margin-bottom:16px}
 .subtotal .r{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.subtotal .r.fee{font-size:14px;color:var(--body);margin-bottom:2px}
+.subtotal .r.fee{font-size:14px;color:var(--body);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .subtotal .k{color:var(--muted)}
 .subtotal .amt{font-size:30px;line-height:1.4;font-weight:700;color:var(--ink);text-align:right}
 .subtotal .sm{font-size:14px;color:var(--muted);margin-top:2px}
@@ -314,10 +325,6 @@ a.tbtn{display:inline-block}
 .dlg-b{padding:20px 24px 22px}
 .dlg-b p{line-height:1.5}
 .dlg-f{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:14px 24px 20px;border-top:1px solid var(--rule)}
-.btn-primary{min-height:44px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:16px;font-weight:700;padding:0 20px}
-.btn-primary:hover{background:var(--orange-hover)}
-.btn-ghost{min-height:44px;border:1px solid var(--navy);border-radius:4px;background:#fff;color:var(--navy);font-size:16px;font-weight:700;padding:0 20px}
-.btn-ghost:hover{background:var(--gray-bg)}
 .drop{border:1px dashed var(--rule-strong);border-radius:4px;padding:18px;text-align:center;margin-top:14px;background:var(--surface)}
 .drop .hint{font-size:13px;color:var(--muted);margin-top:8px}
 .chooser{border:1px solid var(--rule);border-radius:4px;margin-top:10px;text-align:left;background:#fff}
@@ -340,7 +347,11 @@ a.tbtn{display:inline-block}
 .brk .r.tot{border-top:1px solid var(--rule);margin-top:6px;padding-top:10px;font-weight:700}
 .brk .fn{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5}
 /* confirmation panel */
-.conf-ok{display:flex;align-items:center;gap:10px;color:var(--in-stock);font-weight:700;font-size:16px}
+.conf-ok{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:700;font-size:18px}
+.conf-ok .ck{color:var(--in-stock);font-weight:700}
+/* X8: no-artwork band at the top of the panel */
+.conf-band{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--amber-bg);border:1px solid var(--amber-rule);border-radius:4px;padding:12px;color:var(--amber-ink);font-size:16px;line-height:1.5}
+.conf-band p{flex:1 1 260px;margin:0}
 .conf-prod{display:flex;gap:14px;align-items:flex-start;margin-top:14px;padding:12px;border:1px solid var(--rule);border-radius:4px}
 .conf-prod img{width:64px;height:64px;object-fit:contain;background:var(--surface);border-radius:4px;flex:none}
 .conf-prod .nm{font-weight:700;color:var(--ink)}
@@ -390,10 +401,12 @@ a.tbtn{display:inline-block}
   /* sticky CTA bar — keeps Add to cart / Customize; compact rush line above it (§4.8) */
   .mobile-bar{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;
     border-top:1px solid var(--rule);box-shadow:0 -4px 16px rgba(0,0,0,.10);padding:8px 14px 10px;gap:6px}
-  .mobile-bar .line{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink)}
-  .mobile-bar .line b{font-weight:700}
-  .mobile-bar .line .tot{color:var(--muted)}
-  .mobile-bar .go{width:100%;min-height:48px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:17px;font-weight:700}
+  /* X20: ship date regular, subtotal amount bold */
+  .mobile-bar .line{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .mobile-bar .line .tot{color:var(--body)}
+  .mobile-bar .line .tot b{color:var(--ink);font-weight:700}
+  /* X2: 19px/700 white on orange = large-text exemption */
+  .mobile-bar .go{width:100%;min-height:48px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:19px;font-weight:700}
   .site{padding-bottom:110px}
   .olark{bottom:118px;padding:10px 16px;font-size:13px}
   .toast{bottom:126px}
@@ -407,17 +420,29 @@ a.tbtn{display:inline-block}
   .dlv-t td.rng{white-space:normal;font-size:14px}
   .methcards{grid-template-columns:1fr}
 }
+@media (max-width:600px){
+  /* X5: 44px tap height on text-buttons and the badge button; visual text size unchanged */
+  .tbtn,.badge-btn{min-height:44px;display:inline-flex;align-items:center}
+  .subtotal .tbtn{margin-top:0}
+}
 @media (max-width:520px){
   .wrap{padding:0 14px}
   .catnav .rush{margin-left:0}
   .qtyrow{flex-direction:column}
-  .tier th{padding-right:8px;font-size:13px}
-  .tier td button{padding:6px 8px}
   .opt .fee{font-size:14px}
   .dlg-h,.dlg-b,.dlg-f{padding-left:16px;padding-right:16px}
   .zip input{width:100%}
   .zip>div{flex:1 1 100%}
-  .zip .btn-outline{width:100%}
+  .zip .btn-2{width:100%}
+}
+@media (max-width:400px){
+  /* X13: card dates break deliberately into two lines */
+  .opt .dates .sep{display:none}
+  .opt .dates .d2lead{display:inline}
+  .opt .dates .d2{display:block}
+  /* X22: tier table fits 375 — row labels may wrap, 8px cells, nothing clips */
+  .tier th{padding-right:8px;font-size:13px;white-space:normal;line-height:1.3;width:86px}
+  .tier td button{padding:6px 8px}
 }
 </style>
 </head>
@@ -438,7 +463,7 @@ a.tbtn{display:inline-block}
   </div>
   <div class="state-chips">
     <span class="lbl">Clock (CT)</span>
-    <button class="chip on" data-set="clock" data-val="before">Before cutoff &middot; 11:00 AM</button>
+    <button class="chip on" data-set="clock" data-val="before">Before cutoff &middot; 10:30 AM</button>
     <button class="chip" data-set="clock" data-val="near">Near cutoff &middot; 11:15 AM</button>
     <button class="chip" data-set="clock" data-val="after">After cutoff &middot; 1:30 PM</button>
   </div>
@@ -577,12 +602,12 @@ a.tbtn{display:inline-block}
             <div class="acc-body">
               <p class="dlv-prod" id="dlvProd"></p>
               <div class="zip">
-                <div><label for="zipIn">Your ZIP</label><input id="zipIn" type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="53202" autocomplete="postal-code"></div>
-                <button class="btn-outline" id="zipGo" type="button">Update dates</button>
+                <div><label class="lab" for="zipIn">Your ZIP</label><input id="zipIn" type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="53202" autocomplete="postal-code"></div>
+                <button class="btn-2" id="zipGo" type="button">Update dates</button>
               </div>
               <p class="zip-status" id="zipStatus" aria-live="polite"></p>
               <table class="dlv-t" id="dlvTable" aria-label="Shipping options">
-                <thead><tr><th scope="col">Option</th><th scope="col">Arrives as early as</th><th scope="col">Typical price</th></tr></thead>
+                <thead><tr><th scope="col">Option</th><th scope="col">Arrives as early as</th><th scope="col" class="rng">Typical price</th></tr></thead>
                 <tbody></tbody>
               </table>
               <p class="dlv-fn">Exact shipping price depends on your address &mdash; shown at checkout, or ask us in chat.</p>
@@ -617,8 +642,8 @@ a.tbtn{display:inline-block}
       <div class="buybox">
         <p class="bb-sku">SKU: SVR0000106</p>
         <h1 class="bb-h1">12 Can Lakeside Cooler Bag</h1>
-        <!-- NEW §4.5 (4): text badge replaces the /rush image link; it scrolls to and focuses the selector -->
-        <div class="bb-badges" id="badgeRow"><button class="badge badge-btn" id="rushBadge" type="button">24-Hour Rush available</button></div>
+        <!-- §4.5 (4) / X19: production's yellow filled "RUSH ORDER" image badge carried as a text badge; scrolls to and focuses the selector -->
+        <div class="bb-badges" id="badgeRow"><button class="badge-btn" id="rushBadge" type="button"><span class="badge-rush">24-Hour Rush available</span></button></div>
         <p class="bb-tag">Ideal for travel, trade shows, and employee kits.</p>
         <p class="bb-desc">This 12-can cooler bag is made from rugged 600 denier heather polyester. Your logo can be embroidered, screen printed, or heat transferred onto the front or back.</p>
 
@@ -652,13 +677,13 @@ a.tbtn{display:inline-block}
             </div>
             <!-- NEW §4.4: under Rush the radiogroup is replaced by one read-only card (copy deck "Locked method card") -->
             <div id="methLocked" hidden style="margin-bottom:16px">
-              <div class="card on locked" aria-describedby="methLockedHelp"><span class="nm">Embroidery</span><span class="pill">Full Color</span><span class="ds" style="color:var(--ink)">Rush default.</span></div>
+              <div class="card on locked" aria-describedby="methLockedHelp"><span class="nm">Embroidery</span><span class="pill">Full Color</span><span class="pill muted">Rush default</span></div>
               <p id="methLockedHelp" style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5"><button class="tbtn" id="switchStd" type="button">Switch to Standard</button> to choose another method.</p>
             </div>
 
             <details class="disc"><summary>Will It Work For My Artwork?<span class="chev" aria-hidden="true"></span></summary><div class="db">Vector artwork (AI, EPS, PDF, SVG) reproduces best. Fine text below 0.25" and thin lines may fill in with thread.</div></details>
             <button class="howlink" type="button" id="howLink">How Embroidery works</button>
-            <div class="notebox" id="methNote"><span class="ck" aria-hidden="true">&#10003;</span><p><strong>First imprint free</strong> &mdash; full color, one location, one-time setup $12.50 applies.<span class="sub" id="methNoteSub">Add locations below &mdash; extras are priced separately.</span></p></div>
+            <div class="notebox" id="methNote"><span class="ck okg" aria-hidden="true">&#10003;</span><p><strong>First imprint free</strong> &mdash; full color, one location, one-time setup $12.50 applies.<span class="sub" id="methNoteSub">Add locations below &mdash; extras are priced separately.</span></p></div>
             <div class="chgbox"><table class="chg"><thead><tr><th scope="col">Decoration Charges</th><th scope="col">Setup</th><th scope="col">Run Charge</th></tr></thead><tbody id="chgBody"></tbody></table></div>
 
             <h2 class="stephd"><span class="n" aria-hidden="true">4</span>Imprint Details</h2>
@@ -666,7 +691,7 @@ a.tbtn{display:inline-block}
               <div class="upl-row">
                 <!-- Standard: production text-button. Rush: primary-styled (solid navy) button, copy deck "Upload button (rush)" -->
                 <button class="tbtn" id="uplStd" type="button">Upload artwork and instructions (optional)</button>
-                <button class="btn-navy" id="uplRush" type="button" hidden>Upload artwork &mdash; starts your Rush clock at checkout</button>
+                <button class="btn-2" id="uplRush" type="button" hidden>Upload artwork &mdash; starts your Rush clock at checkout</button>
               </div>
               <p class="recv" id="uplRecv" hidden aria-live="polite"></p>
               <div style="margin-top:12px">
@@ -688,20 +713,25 @@ a.tbtn{display:inline-block}
           <div class="pd" id="pdSel">
             <h3 class="pd-h" id="pdHeading">Production &amp; delivery</h3>
             <fieldset role="radiogroup" aria-labelledby="pdHeading">
-              <label class="opt on" id="optStd" for="rStd">
-                <span class="top"><input type="radio" name="tier" id="rStd" value="standard" checked aria-labelledby="stdName stdFee" aria-describedby="stdDates stdHelp"><span class="tier-nm" id="stdName">Standard</span><span class="fee" id="stdFee">included</span></span>
-                <span class="dates" id="stdDates"></span>
-                <span class="help" id="stdHelp">Free digital proof first &mdash; production starts after you approve</span>
-              </label>
-              <label class="opt" id="optRush" for="rRush">
-                <span class="top"><input type="radio" name="tier" id="rRush" value="rush" aria-expanded="false" aria-controls="rushTimeline" aria-labelledby="rushName rushFee" aria-describedby="rushDates rushHelp"><span class="tier-nm" id="rushName">24-Hour Rush</span><span class="fee" id="rushFee">+ $39.00</span></span>
-                <span class="dates" id="rushDates"></span>
-                <span class="help" id="rushHelp">No proof round &middot; default imprint only</span>
-                <!-- the card expands into the timeline (§4.3 "What happens next") -->
+              <!-- X3: radio name = tier + fee + dates; X12: label and timeline are siblings inside the card div -->
+              <div class="opt on" id="optStd">
+                <label for="rStd">
+                  <span class="top"><input type="radio" name="tier" id="rStd" value="standard" checked aria-labelledby="stdName stdFee stdDates" aria-describedby="stdHelp"><span class="tier-nm" id="stdName">Standard</span><span class="fee" id="stdFee">included</span></span>
+                  <span class="dates" id="stdDates"></span>
+                  <span class="help" id="stdHelp">Free digital proof first &mdash; production starts after you approve</span>
+                </label>
+              </div>
+              <div class="opt" id="optRush">
+                <label for="rRush">
+                  <span class="top"><input type="radio" name="tier" id="rRush" value="rush" aria-expanded="false" aria-controls="rushTimeline" aria-labelledby="rushName rushFee rushDates" aria-describedby="rushHelp"><span class="tier-nm" id="rushName">24-Hour Rush</span><span class="fee" id="rushFee">+$39.00</span></span>
+                  <span class="dates" id="rushDates"></span>
+                  <span class="help" id="rushHelp">No proof round &middot; default imprint only</span>
+                </label>
+                <!-- the card expands into the timeline (§4.3 "What happens next"); X4: persistent countdown span -->
                 <div class="tl" id="rushTimeline" role="region" aria-label="What happens next" hidden>
                   <h3>What happens next</h3>
                   <ol>
-                    <li id="tl1"></li>
+                    <li><span id="tl1"></span> <span class="cd" id="tl1Cd" aria-live="polite"></span></li>
                     <li id="tl2"></li>
                     <li id="tl3"></li>
                     <li id="tl4"></li>
@@ -709,7 +739,7 @@ a.tbtn{display:inline-block}
                   <p class="ln" id="tlArt"></p>
                   <p class="ln">Most suppliers start a &ldquo;24-hour&rdquo; clock only after you approve a proof.</p>
                 </div>
-              </label>
+              </div>
             </fieldset>
           </div>
           <!-- NEW §4.3 non-rush products: one line, no cards (B-PDP042) -->
@@ -762,7 +792,7 @@ a.tbtn{display:inline-block}
 
 <!-- §4.8 mobile: sticky CTA bar with the compact rush line -->
 <div class="mobile-bar" id="mobileBar">
-  <div class="line"><span id="mbLine"></span><span class="tot" id="mbTot"></span></div>
+  <div class="line"><span id="mbLine"></span><span class="tot">Subtotal <b id="mbTot"></b></span></div>
   <button class="go" id="mbGo" type="button">Customize Your Product</button>
 </div>
 <button class="olark" id="olark" type="button">&#9679; Chat</button>
@@ -777,7 +807,7 @@ a.tbtn{display:inline-block}
     <div class="dlg-b">
       <p id="uplLead"></p>
       <div class="drop" id="drop">
-        <button class="btn-ghost" type="button" id="chooseBtn">Choose a file</button>
+        <button class="btn-2" type="button" id="chooseBtn">Choose a file</button>
         <p class="hint">AI, EPS, PDF, SVG, PNG or JPG &middot; up to 25 MB</p>
         <!-- prototype-only fake file chooser -->
         <div class="chooser" id="chooser" hidden>
@@ -790,7 +820,7 @@ a.tbtn{display:inline-block}
       <div class="band amber" id="lowRes" hidden>This file may print soft at imprint size. Continue with Rush, or <button class="tbtn" type="button" id="lowResSwitch">switch to Standard</button> for a free proof.</div>
       <div class="instr"><label for="instrTa">Instructions (optional)</label><textarea id="instrTa" placeholder="Thread colors, placement notes, PMS numbers&hellip;"></textarea></div>
     </div>
-    <div class="dlg-f"><button class="btn-ghost" type="button" data-close="upl">Cancel</button><button class="btn-primary" type="button" id="uplDone">Done</button></div>
+    <div class="dlg-f"><button class="btn-2" type="button" data-close="upl">Cancel</button><button class="btn-2" type="button" id="uplDone">Done</button></div>
   </div>
 </div>
 
@@ -799,19 +829,21 @@ a.tbtn{display:inline-block}
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="brkTitle" tabindex="-1" id="dlgBrk">
     <div class="dlg-h"><h2 id="brkTitle">Price breakdown</h2><button class="dlg-x" type="button" aria-label="Close" data-close="brk">&times;</button></div>
     <div class="dlg-b brk" id="brkBody"></div>
-    <div class="dlg-f"><button class="btn-ghost" type="button" data-close="brk">Close</button></div>
+    <div class="dlg-f"><button class="btn-2" type="button" data-close="brk">Close</button></div>
   </div>
 </div>
 
 <!-- Added to cart — confirmation panel (brief; B-PDP037: confirm, then 2–3 next steps). §4.6 cart page is out of scope. -->
 <div class="back" id="backConf">
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="confTitle" tabindex="-1" id="dlgConf">
-    <div class="dlg-h"><h2 id="confTitle" class="conf-ok"><span aria-hidden="true">&#10003;</span>Added to cart</h2><button class="dlg-x" type="button" aria-label="Close" data-close="conf">&times;</button></div>
+    <div class="dlg-h"><h2 id="confTitle" class="conf-ok"><span class="ck" aria-hidden="true">&#10003;</span>Added to cart</h2><button class="dlg-x" type="button" aria-label="Close" data-close="conf">&times;</button></div>
     <div class="dlg-b">
+      <!-- X8: prominent no-artwork band at the top (spec §4.9 "Added-to-cart panel, no artwork") -->
+      <div class="conf-band" id="confBand" hidden><p>Upload artwork now &mdash; your Rush clock starts when we receive it.</p><button class="btn-2" type="button" id="confUpload">Upload artwork</button></div>
       <div class="conf-prod"><img id="confImg" alt=""><div><div class="nm">12 Can Lakeside Cooler Bag</div><div class="cf" id="confCfg"></div></div></div>
       <ul class="conf-lines" id="confLines"></ul>
     </div>
-    <div class="dlg-f"><button class="btn-ghost" type="button" data-close="conf">Continue shopping</button><button class="btn-primary" type="button" id="viewCart">View cart</button></div>
+    <div class="dlg-f"><button class="btn-2" type="button" data-close="conf">Continue shopping</button><button class="btn-2" type="button" id="viewCart">View cart</button></div>
   </div>
 </div>
 
@@ -844,7 +876,7 @@ a.tbtn{display:inline-block}
     {"name": "2Day",      "lo": 2, "hi": 2, "price": "$35–80"},
     {"name": "Overnight", "lo": 1, "hi": 1, "price": "$60–140"}
   ],
-  "clock": {"before": "2026-09-09T11:00:00", "near": "2026-09-09T11:15:00", "after": "2026-09-09T13:30:00"},
+  "clock": {"before": "2026-09-09T10:30:00", "near": "2026-09-09T11:15:00", "after": "2026-09-09T13:30:00"},
   "zip": "53202"
 }
 </script>
@@ -858,7 +890,7 @@ var S;
 function initial(){
   return { product:'rush', clock:'before', artwork:null, tier:'standard', cfgOpen:false,
            method:'emb', loc:'Front Pocket', prevMethod:null, prevLoc:null,
-           color:0, qty:20, zip:D.zip, zipApplied:false, added:false, gal:0 };
+           color:0, qty:20, zip:D.zip, zipApplied:true, added:false, gal:0 };   /* X7: geo ZIP applied on load */
 }
 S = initial();
 var openedAt = Date.now();   /* simulated clock advances in real time from the chosen chip */
@@ -886,13 +918,18 @@ function calc(){
   var minsLeft = before ? Math.max(0, Math.round((cutoff - now)/60000)) : null;
   function arr(ship,n){ return addBiz(ship,n); }
   return {
-    before:before, minsLeft:minsLeft, cutoffDay: before ? 'today' : lab(start),
+    before:before, minsLeft:minsLeft, startDay:start,
     rushShip:rushShip, rushOvn:arr(rushShip,1), rush2:arr(rushShip,2),
     stdShip:stdShip, stdOvn:arr(stdShip,1), std2:arr(stdShip,2),
     ship:function(t){ return t==='rush' ? rushShip : stdShip; }
   };
 }
 function cd(m){ return m>=60 ? Math.floor(m/60)+'h '+(m%60)+'m' : m+'m'; }
+/* X13: every date / time token is a no-wrap span */
+function dt(d){ return '<span class="nw">'+lab(d)+'</span>'; }
+function dtb(d){ return '<b class="nw">'+lab(d)+'</b>'; }
+/* X1: the one cutoff phrase — before cutoff "by 12:00 PM CT today", after "by 12:00 PM CT Thu, Sep 10" */
+function cutoffPhrase(c){ return 'by <span class="nw">'+D.rush.cutoffLabel+'</span> '+(c.before ? 'today' : dt(c.startDay)); }
 
 /* ---------- pricing ---------- */
 function unitFor(q){ var u=D.tiers[0][1]; for(var i=0;i<D.tiers.length;i++){ if(q>=D.tiers[i][0]) u=D.tiers[i][1]; } return u; }
@@ -937,7 +974,7 @@ function renderSelector(c){
   show($('pdLine'), !rushOn);
   show($('badgeRow'), rushOn);
   if(!rushOn){
-    $('pdLine').innerHTML = 'Ships <b>'+lab(c.stdShip)+'</b> &middot; arrives as early as '+lab(c.stdOvn)+' &middot; free digital proof first.';
+    $('pdLine').innerHTML = 'Ships '+dtb(c.stdShip)+' &middot; arrives as early as '+dt(c.stdOvn)+' &middot; free digital proof first.';
     return;
   }
   var r = S.tier==='rush';
@@ -945,21 +982,24 @@ function renderSelector(c){
   $('optStd').classList.toggle('on', !r); $('optRush').classList.toggle('on', r);
   $('rRush').setAttribute('aria-expanded', r ? 'true' : 'false');
   show($('rushTimeline'), r);
-  $('stdDates').innerHTML = 'Ships as soon as <b>'+lab(c.stdShip)+'</b> &middot; arrives as early as '+lab(c.stdOvn);
-  /* conditional wording once added to cart without artwork (§4.4 Add to cart) */
+  /* X13: "Ships <date> · arrives as early as <date>", breaking into two lines at ≤400px */
+  function datesLine(lead, ship, arr){ return lead+' '+dtb(ship)+'<span class="sep"> &middot; arrives as early as </span><span class="d2"><span class="d2lead">Arrives as early as </span>'+dt(arr)+'</span>'; }
+  $('stdDates').innerHTML = datesLine('Ships as soon as', c.stdShip, c.stdOvn);
+  /* conditional wording once added to cart without artwork (§4.4 Add to cart); X1 cutoff phrase */
   if(S.added && !S.artwork && r)
-    $('rushDates').innerHTML = 'Ships <b>'+lab(c.rushShip)+'</b> once we have your artwork by '+D.rush.cutoffLabel;
+    $('rushDates').innerHTML = 'Ships '+dtb(c.rushShip)+' once we have your artwork '+cutoffPhrase(c);
   else
-    $('rushDates').innerHTML = 'Ships <b>'+lab(c.rushShip)+'</b> &middot; arrives as early as '+lab(c.rushOvn);
+    $('rushDates').innerHTML = datesLine('Ships', c.rushShip, c.rushOvn);
   show($('rushHelp'), !r);
-  /* timeline (copy deck verbatim) */
+  /* timeline (copy deck verbatim); X15: prose body, dates + deadline + ship date bold ink */
   var m = D.methods[D.rush.method];
-  var step1 = 'Check out with your artwork by '+D.rush.cutoffLabel+' '+c.cutoffDay;
-  if(r && c.before && c.minsLeft!==null && c.minsLeft<60) step1 += ' <span class="cd" aria-live="polite">&middot; '+cd(c.minsLeft)+' left for this date</span>';
-  $('tl1').innerHTML = step1;
+  $('tl1').innerHTML = 'Check out with your artwork <b>'+cutoffPhrase(c)+'</b>';
+  /* X4: persistent countdown span, content only */
+  var showCd = r && c.before && c.minsLeft!==null && c.minsLeft<60;
+  $('tl1Cd').innerHTML = showCd ? '&middot; <b>'+cd(c.minsLeft)+'</b> left for this date' : '';
   $('tl2').innerHTML = 'Production starts the same business day &mdash; no proof to wait for or approve; we print your artwork as sent, using this item&rsquo;s default imprint ('+m.name+' &middot; '+D.rush.location+')';
-  $('tl3').innerHTML = 'Ships <b>'+lab(c.rushShip)+'</b>';
-  $('tl4').innerHTML = 'Arrives as early as <b>'+lab(c.rushOvn)+'</b> with Overnight; '+lab(c.rush2)+' with 2Day &mdash; you choose shipping at checkout';
+  $('tl3').innerHTML = 'Ships '+dtb(c.rushShip);
+  $('tl4').innerHTML = 'Arrives as early as '+dtb(c.rushOvn)+' with Overnight; '+dt(c.rush2)+' with 2Day &mdash; you choose shipping at checkout';
   var art=$('tlArt');
   if(S.artwork){ art.textContent='Artwork received — your clock starts at checkout.'; art.classList.add('recvd'); }
   else { art.textContent='Artwork later? You can upload after checkout — your clock starts when we receive the file.'; art.classList.remove('recvd'); }
@@ -968,20 +1008,22 @@ function renderSelector(c){
 /* §4.5 Delivery block */
 function renderDelivery(c){
   var r = isRush();
-  $('dlvSum').textContent = r ? 'ships '+lab(c.rushShip)+' ('+D.rush.tier+' Rush)' : 'ships as soon as '+lab(c.stdShip);
+  $('dlvSum').innerHTML = r ? 'ships '+dt(c.rushShip)+' ('+D.rush.tier+' Rush)' : 'ships as soon as '+dt(c.stdShip);
   $('dlvProd').innerHTML = r
-    ? '<b>'+D.rush.tier+' Rush:</b> 1 business day, no proof, default imprint; checkout with artwork by '+D.rush.cutoffLabel+'.'
+    ? '<b>'+D.rush.tier+' Rush:</b> 1 business day, no proof, default imprint; checkout with artwork '+cutoffPhrase(c)+'.'
     : '<b>Standard:</b> Free digital proof within 24 hours; 4 business days production after your approval.';
   var ship = c.ship(r?'rush':'standard');
   var h='';
   for(var i=0;i<D.shipping.length;i++){
     var o=D.shipping[i], lo=addBiz(ship,o.lo), hi=addBiz(ship,o.hi);
-    var date = (S.zipApplied || o.lo===o.hi) ? lab(lo) : lab(lo)+' – '+lab(hi);
-    h+='<tr><td class="opt">'+o.name+'</td><td>'+date+'</td><td class="rng">'+o.price+'</td></tr>';
+    var date = (S.zipApplied || o.lo===o.hi) ? dt(lo) : dt(lo)+' – '+dt(hi);
+    h+='<tr><td class="oname">'+o.name+'</td><td>'+date+'</td><td class="rng">'+o.price+'</td></tr>';
   }
   $('dlvTable').querySelector('tbody').innerHTML=h;
-  $('zipStatus').textContent = S.zipApplied ? 'Arrival dates for ZIP '+S.zip+'.' : 'Enter your ZIP for one arrival date per option.';
-  $('zipIn').value = S.zip;
+  /* X7: status with a Change link when a ZIP is applied */
+  $('zipStatus').innerHTML = S.zipApplied ? 'Dates for ZIP '+esc(S.zip)+' &middot; <button class="tbtn" type="button" id="zipChange">Change</button>' : 'Enter your ZIP for one arrival date per option.';
+  var zc=$('zipChange'); if(zc) zc.addEventListener('click', function(){ $('zipIn').focus(); $('zipIn').select(); });
+  if(document.activeElement!==$('zipIn')) $('zipIn').value = S.zipApplied ? S.zip : '';
 }
 
 /* configurator, subtotal, CTA, mobile bar */
@@ -1014,8 +1056,9 @@ function renderConfig(c){
   var ctaLabel = S.cfgOpen ? 'Add to cart' : 'Customize Your Product';
   $('ctaPrimary').textContent=ctaLabel; $('mbGo').textContent=ctaLabel;
   /* mobile bar: compact rush line (§4.8) */
-  $('mbLine').innerHTML = r ? 'Ships <b>'+lab(c.rushShip)+'</b> &middot; +'+usd(D.rush.fee).replace('.00','') : 'Ships as soon as '+lab(c.stdShip);
-  $('mbTot').textContent='Subtotal '+usd(p.total);
+  /* X20: one money format (+$39.00), ship date regular, subtotal amount bold */
+  $('mbLine').innerHTML = r ? 'Ships '+dt(c.rushShip)+' &middot; +'+usd(D.rush.fee) : 'Ships as soon as '+dt(c.stdShip);
+  $('mbTot').textContent=usd(p.total);
 }
 function renderChips(){
   var chips=document.querySelectorAll('.chip[data-set]');
@@ -1076,7 +1119,12 @@ $('howLink').addEventListener('click', function(){ toast('Production opens the m
 $('olark').addEventListener('click', function(){ toast('Olark chat widget placeholder.'); });
 
 /* ZIP estimator (§4.5) */
-function applyZip(){ var v=$('zipIn').value.replace(/\D/g,''); if(v.length!==5){ $('zipStatus').textContent='Enter a 5-digit ZIP.'; return; } S.zip=v; S.zipApplied=true; renderAll(); announce('Arrival dates updated for ZIP '+v); }
+function applyZip(){
+  var v=$('zipIn').value.replace(/\D/g,'');
+  if(v.length===0){ S.zipApplied=false; renderAll(); announce('ZIP cleared. Arrival dates shown as ranges.'); return; }   /* X7: clearing returns the range table */
+  if(v.length!==5){ $('zipStatus').textContent='Enter a 5-digit ZIP.'; return; }
+  S.zip=v; S.zipApplied=true; renderAll(); announce('Arrival dates updated for ZIP '+v);
+}
 $('zipGo').addEventListener('click', applyZip);
 $('zipIn').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); applyZip(); } });
 $('zipIn').addEventListener('change', applyZip);
@@ -1085,7 +1133,7 @@ $('zipIn').addEventListener('change', applyZip);
 document.querySelectorAll('.chip[data-set]').forEach(function(b){ b.addEventListener('click', function(){
   var k=b.getAttribute('data-set'), v=b.getAttribute('data-val');
   if(k==='artwork'){ S.artwork = v==='none' ? null : v; }
-  else if(k==='product'){ S.product=v; if(v==='none'){ S.tier='standard'; if(S.prevMethod){S.method=S.prevMethod;S.loc=S.prevLoc;S.prevMethod=null;} } }
+  else if(k==='product'){ S.product=v; announce(''); if(v==='none'){ S.tier='standard'; if(S.prevMethod){S.method=S.prevMethod;S.loc=S.prevLoc;S.prevMethod=null;} } }   /* X11: clear the live region */
   else { S[k]=v; openedAt=Date.now(); }
   renderAll();
 }); });
@@ -1163,23 +1211,24 @@ $('brkBtn').addEventListener('click', function(){
 function openConf(){
   var c=calc(), p=price(), r=isRush(), m=p.m, h='';
   $('confCfg').textContent = D.colors[S.color][0]+' · '+S.qty+' pieces · '+m.name+' on '+S.loc+' · '+m.colors;
+  show($('confBand'), r && !S.artwork);   /* X8: band at the top when Rush has no artwork */
   if(r){
-    h+='<li><span class="k">Production</span>'+D.rush.tier+' Rush · ships <b>'+lab(c.rushShip)+'</b>'+(S.artwork ? '' : ' once we have your artwork by '+D.rush.cutoffLabel)+'</li>';
-    h+='<li><span class="k">Delivery</span>Arrives as early as '+lab(c.rushOvn)+' — shipping chosen at checkout</li>';
+    h+='<li><span class="k">Production</span>'+D.rush.tier+' Rush · ships '+dtb(c.rushShip)+(S.artwork ? '' : ' once we have your artwork '+cutoffPhrase(c))+'</li>';
+    h+='<li><span class="k">Delivery</span>Arrives as early as '+dt(c.rushOvn)+' — shipping chosen at checkout</li>';
     h+='<li class="fee"><span>Rush fee (once per order)</span><span>'+usd(p.fee)+'</span></li>';
     h+='<li><span class="k">Proof</span>No proof — '+(S.artwork ? 'we print the artwork you uploaded ('+esc(S.artwork)+').' : 'we print your artwork as sent.')+'</li>';
-    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : '<button class="tbtn" type="button" id="confUpload">Upload artwork to start your Rush clock</button>')+'</li>';
+    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : 'Not uploaded yet')+'</li>';
   } else {
-    h+='<li><span class="k">Production</span>Standard · ships as soon as '+lab(c.stdShip)+' · arrives as early as '+lab(c.stdOvn)+'</li>';
+    h+='<li><span class="k">Production</span>Standard · ships as soon as '+dt(c.stdShip)+' · arrives as early as '+dt(c.stdOvn)+'</li>';
     h+='<li><span class="k">Proof</span>Free digital proof first — production starts after you approve.</li>';
     h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : 'Not uploaded yet — you can send it after checkout.')+'</li>';
   }
   h+='<li class="fee"><span><b style="color:var(--ink)">Subtotal</b></span><span><b style="color:var(--ink)">'+usd(p.total)+'</b></span></li>';
   $('confLines').innerHTML=h;
-  var cu=$('confUpload'); if(cu) cu.addEventListener('click', function(){ closeD(); openUpload(); });
   openD('Conf');
 }
 $('viewCart').addEventListener('click', function(){ toast('Cart page — out of scope for this prototype (spec §4.6).'); });
+$('confUpload').addEventListener('click', function(){ closeD(); openUpload(); });
 
 /* boot */
 renderGallery(); renderAll();
