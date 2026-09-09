@@ -1,0 +1,1188 @@
+<!-- Design library: design/library/promotionpros-pdp.md -->
+<!--
+  PromotionPros — RUSH flow prototype on the current two-step PDP
+  Product: 12 Can Lakeside Cooler Bag (SVR0000106)
+  Spec: docs/2026-09-09-rush-flow-ux-draft.md §4 (4.3 selector + timeline, 4.4 configurator
+        under Rush, 4.5 Delivery block, 4.7 edge states, 4.8 mobile, 4.9 copy deck verbatim)
+  Brief: design/prototypes/2026-09-09-rush-flow/brief.md
+  Style anchors: production DOM saved 2026-09-09 (Tailwind React PDP) > design library >
+        fork base design/prototypes/2026-09-09-quote-flow-v2/index.html (page chrome + tokens)
+
+  What is new on this page (everything else reproduces production):
+    1. Buy box: "Production & delivery" selector replaces the "Rush service" checkbox row (§4.3)
+    2. Rush card expands into the "What happens next" timeline (§4.3)
+    3. "Rush fee (once per order)" line in the subtotal block and the price breakdown (§4.3, 4.4)
+    4. Configurator under Rush: locked method card, plain-text location, primary upload (§4.4)
+    5. Left column: "Delivery" block with ZIP estimator replaces "Production & Shipping" (§4.5)
+    6. Text badge "24-Hour Rush available" replaces the /rush image badge (§4.5)
+    7. "Added to cart" confirmation panel (brief; Baymard B-PDP037) — §4.6 cart is out of scope
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PromotionPros — 12 Can Lakeside Cooler Bag — RUSH flow prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS — design/library/promotionpros-pdp.md (Tailwind semantic tokens
+   re-expressed as custom properties; hex values from computed styles)
+   ============================================================ */
+:root{
+  --orange:#FE5000; --orange-hover:#E04700; --wash:#FFF6F2;
+  --navy:#001542; --ink:#1F1F1F; --body:#525252; --muted:#6C6C6C;
+  --rule:#EEEEEE; --rule-strong:#D4D4D4; --input-border:#CDCDCD;
+  --surface:#F7F7F8; --gray-bg:#F5F5F5;
+  --in-stock:#12653A;
+  --amber-ink:#7A4A00; --amber-bg:#FFF6E5; --amber-rule:#E8C88A;
+  --page:#F2F3F5;
+  --font:'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--font);font-size:16px;line-height:1.5;color:var(--body);background:var(--page)}
+h1,h2,h3,h4,h5,p,ul,ol,figure,table,dl,dd{margin:0}
+ul{padding:0;list-style:none}
+button{font-family:inherit;cursor:pointer;color:inherit}
+a{color:var(--navy)}
+img{max-width:100%}
+[hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important;animation-duration:.01ms !important}}
+
+/* ============================================================
+   PROTOTYPE CHROME — dev chips (brief "Dev controls"); same idiom as quote-flow-v2
+   ============================================================ */
+.proto-bar{position:sticky;top:0;z-index:200;background:#14181D;color:#B9C0C9;font-size:13px;
+  display:flex;align-items:center;gap:6px;padding:8px 16px;flex-wrap:wrap}
+.proto-bar b{color:#fff;font-weight:700;margin-right:8px}
+.proto-note{margin-left:auto;color:#7B8494;font-size:12px}
+.chipdeck{padding:12px 0 6px}
+.state-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:3px 0}
+.state-chips .lbl{font-size:13px;color:var(--muted);font-weight:700;min-width:84px}
+.chip{border:1px solid var(--rule-strong);background:#fff;border-radius:20px;padding:6px 14px;font-size:13px;color:var(--body)}
+.chip:hover{border-color:var(--navy)}
+.chip.on{border-color:var(--navy);background:var(--navy);color:#fff;font-weight:700}
+.chip.reset{margin-left:8px;border-style:dashed}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:32px;background:#14181D;color:#fff;font-size:15px;
+  padding:13px 20px;border-radius:4px;z-index:300;display:none;max-width:calc(100% - 32px);text-align:center;
+  box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.toast.on{display:block}
+
+/* ============================================================
+   SITE CHROME — reproduced from the 2026-09-09 capture (fork base)
+   ============================================================ */
+.site{background:#fff}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+.util{background:var(--navy);color:#fff;font-size:12px}
+.util .wrap{display:flex;align-items:center;gap:14px;padding-top:7px;padding-bottom:7px;flex-wrap:wrap}
+.util a{color:#fff;text-decoration:none}
+.util .star{color:#FFB12E}
+.util .right{margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.util .tel{color:var(--orange);font-weight:700}
+.head-main .wrap{display:flex;align-items:center;gap:20px;padding-top:14px;padding-bottom:14px}
+.logo{font-weight:900;font-size:21px;color:var(--navy);letter-spacing:-.4px;white-space:nowrap}
+.logo i{color:var(--orange);font-style:normal}
+.logo small{display:block;font-size:9px;font-weight:400;color:var(--body);letter-spacing:.2px}
+.searchbox{flex:1;display:flex;border:1px solid var(--input-border);border-radius:4px;overflow:hidden;min-width:0}
+.searchbox input{flex:1;border:0;padding:11px 14px;font-size:14px;font-family:inherit;min-width:0}
+.searchbox button{border:0;background:#fff;padding:0 14px;color:var(--navy)}
+.head-icons{display:flex;gap:16px;color:var(--navy);font-size:18px}
+.catnav{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.catnav .wrap{display:flex;align-items:center;gap:16px;padding-top:0;padding-bottom:0;flex-wrap:wrap}
+.catnav .allcat{background:var(--navy);color:#fff;font-size:13px;font-weight:700;padding:11px 16px;border:0;margin-right:4px}
+.catnav a{font-size:13.5px;color:var(--ink);text-decoration:none;padding:12px 0}
+.catnav .rush{margin-left:auto;color:var(--orange);font-weight:700}
+.catnav .sale{border:1px solid var(--orange);color:var(--orange);border-radius:3px;padding:4px 10px;font-weight:700}
+.crumb{font-size:13px;color:var(--muted);padding:14px 0 10px}
+.crumb a{color:var(--muted);text-decoration:none}
+
+.pdp-grid{display:grid;grid-template-columns:minmax(0,1fr) 524px;gap:48px;align-items:start;padding-bottom:8px}
+.pdp-grid>*{min-width:0}
+.gal-main{position:relative;background:var(--surface);border-radius:4px;display:flex;align-items:center;justify-content:center;padding:10px;min-height:300px}
+.gal-main img{height:380px;width:auto;object-fit:contain}
+.gal-arrow{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;
+  background:#fff;border:1px solid var(--rule);color:var(--ink);font-size:15px;line-height:1}
+.gal-arrow.l{left:12px} .gal-arrow.r{right:12px}
+.gal-thumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.gal-thumbs button{width:62px;height:62px;border:1px solid var(--rule);background:var(--surface);border-radius:3px;padding:3px}
+.gal-thumbs button.on{border:2px solid var(--orange)}
+.gal-thumbs img{width:100%;height:100%;object-fit:contain}
+
+/* Key Facts — production: rounded-md border border-rule p-4, 13px bold label, check + bold lead */
+.keyfacts{border:1px solid var(--rule);border-radius:6px;padding:16px;margin-top:20px}
+.keyfacts h2{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.keyfacts li{font-size:14px;color:var(--body);padding:3px 0;line-height:1.5}
+.keyfacts li strong{color:var(--ink)}
+.keyfacts .ck{color:var(--in-stock);font-weight:700;margin-right:6px}
+
+/* Accordions — production <details class="pdp-disclosure">: h2 18px/700 + 13px summary + chevron */
+.accs{margin-top:22px}
+details.acc{border-top:1px solid var(--rule)}
+details.acc>summary{display:flex;align-items:center;gap:12px;padding:16px 16px;cursor:pointer;list-style:none}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary:hover{background:var(--surface)}
+details.acc>summary h2{font-size:18px;line-height:1.4;font-weight:700;color:var(--ink)}
+details.acc>summary .sum{font-size:13px;color:var(--body)}
+details.acc>summary .chev{margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);flex:none}
+details.acc[open]>summary .chev{transform:rotate(-135deg) translateY(-2px)}
+.acc-body{padding:0 16px 16px;font-size:16px;color:var(--body)}
+.acc-body p{line-height:1.5}
+.badge{display:inline-flex;align-items:center;font-size:13px;font-weight:700;color:var(--ink);border:1px solid var(--rule-strong);border-radius:4px;padding:2px 8px;background:#fff;line-height:1.4}
+.mdisc{border-radius:6px;background:var(--surface);margin-bottom:12px;overflow:hidden}
+.mdisc>summary{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;list-style:none}
+.mdisc>summary::-webkit-details-marker{display:none}
+.mdisc>summary .n{display:block;font-weight:700;color:var(--ink)}
+.mdisc>summary .s{display:block;font-size:13px;color:var(--body)}
+.mdisc>summary .chev{margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);flex:none}
+.mdisc .mb{padding:0 16px 14px}
+.mdisc .mb p{margin-bottom:12px}
+.kv{border:1px solid var(--rule);border-radius:4px;background:#fff}
+.kv>div{display:flex;gap:16px;padding:10px 14px;border-bottom:1px solid var(--rule);align-items:baseline}
+.kv>div:last-child{border-bottom:0}
+.kv .k{flex:none;width:160px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kv .v{color:var(--ink)}
+.kv .v small{font-size:12px;color:var(--muted)}
+.okg{color:var(--in-stock);font-weight:700}
+.skuline{font-size:16px;color:var(--body);padding:16px 16px 24px;border-top:1px solid var(--rule)}
+.skuline .st{color:var(--in-stock);font-weight:700;margin-left:12px}
+
+/* ---- NEW §4.5: Delivery block body ---- */
+.dlv-prod{margin-bottom:14px}
+.dlv-prod b{color:var(--ink)}
+.zip{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px}
+.zip label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.zip input{width:120px;height:44px;border:1px solid var(--rule-strong);border-radius:4px;padding:0 12px;font:inherit;font-size:16px;color:var(--ink)}
+.zip .btn-outline{height:44px;border:1px solid var(--navy);background:#fff;color:var(--navy);border-radius:4px;padding:0 16px;font-size:14px;font-weight:700}
+.zip .btn-outline:hover{background:var(--gray-bg)}
+.zip-status{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:20px}
+.dlv-t{width:100%;border-collapse:collapse;font-size:16px}
+.dlv-t th{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule)}
+.dlv-t td{padding:10px 12px;border-bottom:1px solid var(--rule);color:var(--ink);vertical-align:top}
+.dlv-t tr:last-child td{border-bottom:0}
+.dlv-t td.opt{font-weight:700}
+.dlv-t td.rng{color:var(--body);white-space:nowrap}
+.dlv-fn{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5}
+
+/* ============================================================
+   BUY BOX — production idiom (Tailwind classes translated 1:1)
+   ============================================================ */
+.buybox{position:static}
+.bb-sku{font-size:13px;color:var(--muted)}
+.bb-h1{font-size:24px;line-height:32px;font-weight:700;color:var(--ink);margin-top:8px}
+.bb-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+/* NEW §4.5: text badge — same .badge idiom as "3 methods"; it is a button that focuses the selector */
+.badge-btn{cursor:pointer}
+.badge-btn:hover{text-decoration:underline;border-color:var(--navy)}
+.bb-tag{margin-top:12px;border-left:3px solid var(--orange);padding-left:12px;color:var(--ink);line-height:1.5}
+.bb-desc{margin-top:12px;color:var(--body)}
+.bb-setup{margin-top:24px}
+.stephd{display:flex;align-items:center;gap:8px;font-size:18px;line-height:1.4;font-weight:700;color:var(--ink);margin:24px 0 12px}
+.stephd:first-child{margin-top:0}
+.stephd .n{color:var(--orange)}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatch{width:44px;height:44px;border-radius:50%;padding:2px;background:none;border:0;box-shadow:0 0 0 1px var(--rule);transition:box-shadow .15s}
+.swatch:hover{box-shadow:0 0 0 1px var(--rule-strong)}
+.swatch span{display:block;width:100%;height:100%;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+.swatch.on{box-shadow:0 0 0 1px #fff, 0 0 0 3px var(--orange)}
+.colorname{font-size:14px;color:var(--ink);font-weight:700;margin:8px 0 20px}
+.tierwrap{overflow-x:auto;margin-bottom:16px}
+.tier{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+.tier th{padding:6px 12px 6px 0;text-align:left;font-weight:400;white-space:nowrap;color:var(--muted)}
+.tier td{padding:0;text-align:center;border:1px solid transparent}
+.tier td button{width:100%;background:none;border:0;padding:6px 12px;white-space:nowrap;font-size:14px;color:var(--body);transition:background .15s}
+.tier td button:hover{background:var(--wash)}
+.tier td.on{border-left-color:var(--orange);border-right-color:var(--orange);background:var(--wash)}
+.tier tr:first-child td.on{border-top-color:var(--orange);border-radius:4px 4px 0 0}
+.tier tr:last-child td.on{border-bottom-color:var(--orange);border-radius:0 0 4px 4px}
+.tier td.on button{font-weight:700;color:var(--ink)}
+.qtyrow{display:flex;gap:12px;margin-bottom:20px}
+.qtyrow>*{flex:1;min-width:0}
+.qtyrow .lab{display:block;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.qtyrow input,.qtyrow output{display:block;width:100%;border:1px solid var(--rule-strong);border-radius:4px;padding:8px 12px;font:inherit;font-size:18px;font-weight:700;color:var(--ink);background:#fff;line-height:1.4}
+.qtyrow input{border-color:var(--orange)}
+.qtyrow output{background:var(--surface)}
+.info-i{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--rule-strong);font-size:10px;font-weight:700;color:var(--muted);background:none;padding:0;vertical-align:middle;cursor:help}
+
+/* recap chip (steps 3–4) — production */
+.recap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;font-size:14px;color:var(--body)}
+.recap .n{font-size:18px;line-height:1;font-weight:700;color:var(--orange);margin-right:8px}
+.recap b{color:var(--ink)}
+
+/* text-buttons — ONE style for every text-button on the page (consistency matrix row 2) */
+.tbtn{background:none;border:0;padding:0;font-size:13px;font-weight:700;color:var(--navy);text-decoration:underline;text-underline-offset:2px;line-height:1.5;text-align:left}
+.tbtn:hover{text-decoration:none}
+a.tbtn{display:inline-block}
+
+/* method cards — production: rounded border px-3 py-2; selected = border-secondary + bg-secondary-wash */
+.methcards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.card{border:1px solid var(--rule);border-radius:4px;background:#fff;padding:8px 12px;text-align:left;transition:border-color .15s,background .15s;cursor:pointer}
+.card:hover{border-color:var(--rule-strong);background:var(--surface)}
+.card.on,.card.on:hover{border-color:var(--orange);background:var(--wash)}
+.card .nm{color:var(--ink)}
+.card.on .nm{font-weight:700}
+.card .pill{display:inline-block;border:1px solid var(--rule-strong);border-radius:999px;padding:2px 8px;font-size:13px;color:var(--ink);white-space:nowrap;margin-left:6px;line-height:1.4}
+.card .ds{display:block;margin-top:3px;font-size:13px;line-height:1.45;color:var(--muted)}
+/* NEW §4.4: locked method card — same card idiom, selected state, not a control */
+.card.locked{cursor:default}
+.card.locked:hover{border-color:var(--orange);background:var(--wash)}
+.disc{border-radius:6px;background:rgba(238,238,238,.4);margin-bottom:8px}
+.disc>summary{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;list-style:none}
+.disc>summary::-webkit-details-marker{display:none}
+.disc>summary .chev{margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px)}
+.disc .db{padding:0 16px 12px;font-size:14px;color:var(--body)}
+.howlink{background:none;border:0;padding:4px 0;font-size:14px;color:var(--muted);text-decoration:underline;margin-bottom:4px}
+.notebox{display:flex;gap:8px;border:1px solid var(--rule);border-radius:4px;background:var(--surface);padding:12px;margin-bottom:8px;font-size:14px;color:var(--body);line-height:1.5}
+.notebox .ck{color:var(--in-stock);font-weight:700}
+.notebox strong{color:var(--ink)}
+.notebox .sub{display:block;color:var(--muted);margin-top:2px}
+.chgbox{border:1px solid var(--rule);border-radius:4px;background:var(--surface);padding:12px;margin-top:4px;overflow-x:auto}
+.chg{width:100%;border-collapse:collapse;font-size:14px;color:var(--ink)}
+.chg th{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 12px;border-bottom:1px solid var(--rule)}
+.chg td{padding:6px 12px;border-bottom:1px solid var(--rule)}
+.chg tr:last-child td{border-bottom:0}
+.imp{border:1px solid var(--rule);border-radius:4px;background:var(--surface);padding:12px;margin-bottom:12px}
+.imp .lab{display:block;font-weight:700;color:var(--ink);margin-bottom:4px}
+.imp select{width:100%;appearance:none;-webkit-appearance:none;border:1px solid var(--rule-strong);border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%23555' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;padding:8px 32px 8px 12px;font:inherit;color:var(--ink);cursor:pointer}
+.imp .plain{color:var(--ink)}
+.imp .row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 12px;margin-top:12px}
+.imp .cost{white-space:nowrap;color:var(--muted)}
+.imp .cost b{color:var(--ink)}
+.upl-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+/* NEW §4.4: primary-styled upload under Rush — solid navy, never orange (orange = primary CTA only) */
+.btn-navy{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:4px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;padding:0 16px;text-align:left;line-height:1.3}
+.btn-navy:hover{background:#0A2560}
+.recv{font-size:13px;color:var(--in-stock);font-weight:700;margin-top:6px;line-height:1.5}
+.recv .fn{color:var(--ink)}
+.addloc{margin-bottom:16px}
+
+/* ---- NEW §4.3: Production & delivery selector ---- */
+.pd{margin-bottom:16px}
+.pd-h{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.pd fieldset{border:0;padding:0;margin:0;min-width:0}
+.pd fieldset legend{padding:0}
+.opt{display:block;border:1px solid var(--rule);border-radius:4px;background:#fff;padding:10px 12px;cursor:pointer;transition:border-color .15s,background .15s}
+.opt+.opt{margin-top:8px}
+.opt:hover{border-color:var(--rule-strong);background:var(--surface)}
+.opt.on,.opt.on:hover{border-color:var(--orange);background:var(--wash)}
+.opt .top{display:flex;align-items:center;gap:8px}
+.opt input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--orange)}
+.opt .tier-nm{font-size:16px;font-weight:700;color:var(--ink)}
+.opt .fee{margin-left:auto;font-size:14px;color:var(--body);white-space:nowrap}
+.opt .dates{display:block;margin:4px 0 0 24px;font-size:16px;color:var(--ink);line-height:1.5}
+.opt .dates b{font-weight:700}
+.opt .help{display:block;margin:2px 0 0 24px;font-size:13px;color:var(--muted);line-height:1.5}
+.tl{margin:12px 0 0 24px;border-top:1px solid var(--rule);padding-top:12px}
+.tl h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.tl ol{margin:0;padding:0;list-style:none;counter-reset:st}
+.tl li{position:relative;padding-left:26px;font-size:16px;line-height:1.5;color:var(--ink);margin-bottom:6px;counter-increment:st}
+.tl li::before{content:counter(st);position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tl li b{font-weight:700}
+.tl .cd{color:var(--ink);font-weight:700}
+.tl .ln{font-size:13px;color:var(--muted);line-height:1.5;margin-top:8px}
+.tl .ln+.ln{margin-top:4px}
+.tl .ln.recvd{color:var(--in-stock);font-weight:700}
+/* NEW §4.3 non-rush products: one line, no cards */
+.pd-line{font-size:16px;color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;line-height:1.5}
+.pd-link{margin:8px 0 16px}
+
+/* subtotal — production: border-l-[3px] border-secondary py-1 pl-3 */
+.subtotal{border-left:3px solid var(--orange);padding:4px 0 4px 12px;margin-bottom:16px}
+.subtotal .r{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.subtotal .r.fee{font-size:14px;color:var(--body);margin-bottom:2px}
+.subtotal .k{color:var(--muted)}
+.subtotal .amt{font-size:30px;line-height:1.4;font-weight:700;color:var(--ink);text-align:right}
+.subtotal .sm{font-size:14px;color:var(--muted);margin-top:2px}
+.cta-primary{width:100%;border:0;border-radius:4px;background:var(--orange);color:#fff;
+  font-size:20px;line-height:28px;font-weight:700;padding:12px 16px;transition:background .15s}
+.cta-primary:hover{background:var(--orange-hover)}
+.bb-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-top:12px;font-size:14px;color:var(--muted)}
+.bb-foot a{color:var(--ink)}
+.bb-foot .sec{color:#0066C0;background:none;border:0;padding:0;font-size:14px}
+
+/* ---- dialogs — one shell for Upload, Price breakdown, Added to cart (react-modal idiom: white, 600px) ---- */
+.back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:180;display:none;align-items:flex-start;justify-content:center;padding:64px 16px 24px;overflow:auto}
+.back.open{display:flex}
+.dlg{background:#fff;border-radius:4px;width:600px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);outline:none}
+.dlg-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 24px;border-bottom:1px solid var(--rule)}
+.dlg-h h2{font-size:18px;line-height:1.4;font-weight:700;color:var(--ink)}
+.dlg-x{background:none;border:0;font-size:22px;color:var(--body);width:36px;height:36px;border-radius:4px;line-height:1}
+.dlg-b{padding:20px 24px 22px}
+.dlg-b p{line-height:1.5}
+.dlg-f{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:14px 24px 20px;border-top:1px solid var(--rule)}
+.btn-primary{min-height:44px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:16px;font-weight:700;padding:0 20px}
+.btn-primary:hover{background:var(--orange-hover)}
+.btn-ghost{min-height:44px;border:1px solid var(--navy);border-radius:4px;background:#fff;color:var(--navy);font-size:16px;font-weight:700;padding:0 20px}
+.btn-ghost:hover{background:var(--gray-bg)}
+.drop{border:1px dashed var(--rule-strong);border-radius:4px;padding:18px;text-align:center;margin-top:14px;background:var(--surface)}
+.drop .hint{font-size:13px;color:var(--muted);margin-top:8px}
+.chooser{border:1px solid var(--rule);border-radius:4px;margin-top:10px;text-align:left;background:#fff}
+.chooser .ch-h{font-size:13px;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--rule)}
+.chooser button{display:flex;justify-content:space-between;gap:12px;width:100%;background:none;border:0;border-bottom:1px solid var(--rule);padding:10px 12px;font-size:16px;color:var(--ink);text-align:left}
+.chooser button:last-child{border-bottom:0}
+.chooser button:hover{background:var(--surface)}
+.chooser button span{color:var(--muted);font-size:13px}
+.filerow{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--rule);border-radius:4px;padding:12px;margin-top:14px}
+.filerow b{color:var(--ink)}
+.filerow .meta{font-size:13px;color:var(--muted)}
+.band{border-radius:4px;padding:10px 12px;font-size:14px;line-height:1.5;margin-top:12px}
+.band.amber{background:var(--amber-bg);border:1px solid var(--amber-rule);color:var(--amber-ink)}
+.band.amber .tbtn{color:var(--amber-ink)}
+.instr{margin-top:14px}
+.instr label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.instr textarea{width:100%;min-height:72px;border:1px solid var(--rule-strong);border-radius:4px;padding:10px 12px;font:inherit;font-size:16px;color:var(--ink);resize:vertical}
+.brk .r{display:flex;justify-content:space-between;gap:12px;padding:6px 0;color:var(--ink)}
+.brk .r.lab{color:var(--muted)}
+.brk .r.tot{border-top:1px solid var(--rule);margin-top:6px;padding-top:10px;font-weight:700}
+.brk .fn{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5}
+/* confirmation panel */
+.conf-ok{display:flex;align-items:center;gap:10px;color:var(--in-stock);font-weight:700;font-size:16px}
+.conf-prod{display:flex;gap:14px;align-items:flex-start;margin-top:14px;padding:12px;border:1px solid var(--rule);border-radius:4px}
+.conf-prod img{width:64px;height:64px;object-fit:contain;background:var(--surface);border-radius:4px;flex:none}
+.conf-prod .nm{font-weight:700;color:var(--ink)}
+.conf-prod .cf{font-size:14px;color:var(--body);margin-top:2px}
+.conf-lines{margin-top:14px}
+.conf-lines li{padding:6px 0;border-bottom:1px solid var(--rule);color:var(--ink);line-height:1.5}
+.conf-lines li:last-child{border-bottom:0}
+.conf-lines li .k{color:var(--muted);font-size:13px;display:block}
+.conf-lines li.fee{display:flex;justify-content:space-between;gap:12px}
+
+/* ---- rest of page (reproduction) ---- */
+.related{margin-top:32px;border-top:1px solid var(--rule);padding-top:16px}
+.rel-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-bottom:16px}
+.rel-tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font-size:14px;font-weight:700;color:var(--ink)}
+.rel-tabs button.on{border-bottom-color:var(--orange);color:var(--orange)}
+.rel-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.rel-card{border:1px solid var(--rule);border-radius:6px;padding:10px}
+.rel-card .ph{height:110px;background:var(--surface);border-radius:4px;margin-bottom:10px}
+.rel-card .nm{font-size:14px;font-weight:700;color:var(--ink);line-height:1.4}
+.rel-card .sk{font-size:12px;color:var(--muted);margin-top:2px}
+.rel-card .pr{font-size:14px;color:var(--ink);margin-top:6px}
+.rel-card .pr b{font-weight:700}
+.contact-banner{text-align:center;padding:34px 16px 40px;border-top:1px solid var(--rule);margin-top:32px}
+.contact-banner h2{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:10px}
+.contact-banner p{font-size:16px;max-width:78ch;margin:0 auto}
+.site-foot{background:var(--navy);color:#fff;padding:34px 0 26px}
+.site-foot .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;font-size:13px}
+.site-foot h4{font-size:12px;font-weight:700;letter-spacing:.4px;margin-bottom:10px;color:#fff}
+.site-foot a,.site-foot p{color:#C8CEDC;text-decoration:none;display:block;margin-bottom:6px;line-height:1.5}
+.site-foot .copy{border-top:1px solid #16305F;margin-top:26px;padding-top:16px;font-size:12px;color:#8E9AB4;text-align:center}
+.olark{position:fixed;right:18px;bottom:24px;z-index:50;background:var(--navy);color:#fff;border:0;border-radius:24px;
+  padding:12px 20px;font-size:14px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.mobile-bar{display:none}
+
+/* ============================================================
+   RESPONSIVE — §4.8 mobile
+   ============================================================ */
+@media (max-width:960px){
+  .pdp-grid{grid-template-columns:minmax(0,1fr);gap:26px}
+  .buybox{position:static}
+  .gal-main img{height:260px}
+  .site-foot .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .back{padding:0;align-items:stretch}
+  .dlg{width:100%;border-radius:0;min-height:100%;display:flex;flex-direction:column}
+  .dlg-b{flex:1;overflow:auto}
+  /* sticky CTA bar — keeps Add to cart / Customize; compact rush line above it (§4.8) */
+  .mobile-bar{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;
+    border-top:1px solid var(--rule);box-shadow:0 -4px 16px rgba(0,0,0,.10);padding:8px 14px 10px;gap:6px}
+  .mobile-bar .line{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink)}
+  .mobile-bar .line b{font-weight:700}
+  .mobile-bar .line .tot{color:var(--muted)}
+  .mobile-bar .go{width:100%;min-height:48px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:17px;font-weight:700}
+  .site{padding-bottom:110px}
+  .olark{bottom:118px;padding:10px 16px;font-size:13px}
+  .toast{bottom:126px}
+  .state-chips .lbl{min-width:0;width:100%}
+  /* §4.8 Delivery table collapses to a list: option · date · price range */
+  .dlv-t thead{display:none}
+  .dlv-t,.dlv-t tbody,.dlv-t tr,.dlv-t td{display:block;width:100%}
+  .dlv-t tr{border-bottom:1px solid var(--rule);padding:8px 0}
+  .dlv-t tr:last-child{border-bottom:0}
+  .dlv-t td{padding:2px 0;border:0}
+  .dlv-t td.rng{white-space:normal;font-size:14px}
+  .methcards{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .wrap{padding:0 14px}
+  .catnav .rush{margin-left:0}
+  .qtyrow{flex-direction:column}
+  .tier th{padding-right:8px;font-size:13px}
+  .tier td button{padding:6px 8px}
+  .opt .fee{font-size:14px}
+  .dlg-h,.dlg-b,.dlg-f{padding-left:16px;padding-right:16px}
+  .zip input{width:100%}
+  .zip>div{flex:1 1 100%}
+  .zip .btn-outline{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PROTOTYPE CHROME — dev chips only set state; every reviewer path uses the real controls
+     ============================================================ -->
+<div class="proto-bar">
+  <b>RUSH flow — two-step PDP</b>
+  <span class="proto-note">promotionpros.com &middot; 12 Can Lakeside Cooler Bag &middot; 2026-09-09 &middot; spec v2.1 &sect;4</span>
+</div>
+<div class="wrap chipdeck" id="chipdeck">
+  <div class="state-chips">
+    <span class="lbl">Product</span>
+    <button class="chip on" data-set="product" data-val="rush">Rush-capable</button>
+    <button class="chip" data-set="product" data-val="none">No rush tier</button>
+  </div>
+  <div class="state-chips">
+    <span class="lbl">Clock (CT)</span>
+    <button class="chip on" data-set="clock" data-val="before">Before cutoff &middot; 11:00 AM</button>
+    <button class="chip" data-set="clock" data-val="near">Near cutoff &middot; 11:15 AM</button>
+    <button class="chip" data-set="clock" data-val="after">After cutoff &middot; 1:30 PM</button>
+  </div>
+  <div class="state-chips">
+    <span class="lbl">Artwork</span>
+    <button class="chip on" data-set="artwork" data-val="none">None</button>
+    <button class="chip" data-set="artwork" data-val="logo.ai">Uploaded (logo.ai)</button>
+    <button class="chip reset" id="chipReset">Reset</button>
+  </div>
+</div>
+
+<div class="site">
+  <!-- site header — reproduction -->
+  <div class="util">
+    <div class="wrap">
+      <span class="star">&#9733;</span> <span>ShopperApproved &nbsp;|&nbsp; Verified reviews</span>
+      <span class="right">
+        <span>Speak to a Pro <a class="tel" href="tel:8446677666">(844) 667-7666</a></span>
+        <a href="#">Live Chat</a><a href="#">f</a><a href="#">ig</a><a href="#">in</a>
+      </span>
+    </div>
+  </div>
+  <div class="head-main">
+    <div class="wrap">
+      <div class="logo">Promotion<i>Pros</i><small>Put your brand on it.</small></div>
+      <div class="searchbox"><input type="text" aria-label="Search for items and brands" placeholder="Search for items and brands"><button aria-label="Search">&#9906;</button></div>
+      <div class="head-icons"><span aria-hidden="true">&#9737;</span><span aria-hidden="true">&#9825;</span><span aria-hidden="true">&#128722;</span></div>
+    </div>
+  </div>
+  <nav class="catnav" aria-label="Categories">
+    <div class="wrap">
+      <button class="allcat">&#9776; All Categories</button>
+      <a href="#">USA Made</a><a href="#">Budget Buys</a><a href="#">Apparel</a><a href="#">Bags</a>
+      <a href="#">Drinkware</a><a href="#">Office &amp; Awards</a><a href="#">Stationery</a>
+      <a class="rush" href="#">In a Rush? &#128293;</a><a class="sale" href="#">On Sale</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <nav class="crumb" aria-label="breadcrumb"><a href="#">Home</a> &rsaquo; <a href="#">Bags</a> &rsaquo; <a href="#">Coolers</a> &rsaquo; 12 Can Lakeside Cooler Bag</nav>
+
+    <div class="pdp-grid">
+      <!-- ================= LEFT COLUMN ================= -->
+      <div>
+        <div class="gallery">
+          <div class="gal-main">
+            <button class="gal-arrow l" aria-label="Previous Slide">&#8249;</button>
+            <img id="galMain" alt="12 Can Lakeside Cooler Bag">
+            <button class="gal-arrow r" aria-label="Next Slide">&#8250;</button>
+          </div>
+          <div class="gal-thumbs" id="galThumbs"></div>
+        </div>
+
+        <section class="keyfacts" aria-labelledby="kfTitle">
+          <h2 id="kfTitle">Key Facts</h2>
+          <ul>
+            <li><span class="ck" aria-hidden="true">&#10003;</span><strong>600 denier heather polyester</strong> &mdash; rugged fabric for daily use</li>
+            <li><span class="ck" aria-hidden="true">&#10003;</span><strong>Fully insulated and waterproof</strong> &mdash; keeps contents cool and dry</li>
+            <li><span class="ck" aria-hidden="true">&#10003;</span><strong>Large gusseted front pocket</strong> &mdash; expands for extra storage</li>
+            <li><span class="ck" aria-hidden="true">&#10003;</span><strong>Adjustable non-slip shoulder strap</strong> &mdash; comfort pad for carrying</li>
+          </ul>
+        </section>
+
+        <div class="accs">
+          <details class="acc">
+            <summary><h2>Description</h2><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body">
+              <p><strong style="color:var(--ink)">Built for daily use</strong><br>This 12-can cooler bag is constructed from rugged 600 denier heather polyester, a durable fabric that stands up to regular use. The fully insulated and waterproof main compartment keeps food and drinks cold, while the large gusseted zippered front pocket and two side mesh pockets offer ample storage for accessories.</p>
+              <p style="margin-top:12px"><strong style="color:var(--ink)">Comfortable to carry</strong><br>An adjustable, non-slip shoulder strap with a comfort pad makes it easy to transport, whether you're heading to work, a picnic, or a trade show. The bag's compact dimensions of 10 x 9 x 10 inches and light 1-pound weight make it convenient to carry and store.</p>
+              <p style="margin-top:12px"><strong style="color:var(--ink)">Ready for your brand</strong><br>Your logo can be applied using embroidery, screen print, or heat transfer, each offering a distinct look. The front and back panels provide ample space for branding, making this cooler a practical choice for corporate gifts and employee kits.</p>
+            </div>
+          </details>
+          <details class="acc">
+            <summary><h2>Specifications</h2><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body"><div class="kv">
+              <div><span class="k">Material</span><span class="v">600 denier heather polyester</span></div>
+              <div><span class="k">Size</span><span class="v">10" W &times; 9" H &times; 10" D</span></div>
+              <div><span class="k">Weight</span><span class="v">1 lb</span></div>
+              <div><span class="k">Capacity</span><span class="v">12 cans</span></div>
+            </div></div>
+          </details>
+          <details class="acc">
+            <summary><h2>Quantity pricing</h2><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body"><p>20&ndash;99 pieces $21.74 each, 100&ndash;299 pieces $20.99 each, 300&ndash;599 pieces $20.29 each, 600&ndash;5,000 pieces $19.32 each. Prices are per unit, imprint included &mdash; one-time setup charged separately.</p></div>
+          </details>
+          <details class="acc" open>
+            <summary><h2>Decoration &amp; Imprint</h2><span class="badge">3 methods</span><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body">
+              <p style="margin-bottom:14px">Your logo can be placed on the front or back panel of the cooler bag. Choose from embroidery for a raised, textured stitch, screen print for crisp opaque color, or heat transfer for a smooth, low-profile mark.</p>
+              <details class="mdisc">
+                <summary><span><span class="n">Embroidery</span><span class="s">Full-color imprint &middot; 1 location included &middot; one-time setup $12.50</span></span><span class="chev" aria-hidden="true"></span></summary>
+                <div class="mb">
+                  <p>Embroidery stitches your design directly into the fabric with colored thread, building the mark from dense rows of stitches. The result is a raised, textured mark with the soft sheen of thread and a slightly dimensional edge. Each shape reads as a clean, saturated block, and the sewn-in design resists fading, peeling, and wear through repeated washing.</p>
+                  <div class="kv">
+                    <div><span class="k">Locations &amp; sizes</span><span class="v">Front Pocket, Flap 3" dia</span></div>
+                    <div><span class="k">Max colors</span><span class="v">Full color</span></div>
+                    <div><span class="k">Minimum order</span><span class="v">20 pieces</span></div>
+                    <div><span class="k">Included</span><span class="v"><span class="okg">&#10003; Full-color imprint in one location</span> &mdash; one-time setup $12.50 applies</span></div>
+                    <div><span class="k">Charges</span><span class="v"><b>$12.50</b> <small>one-time setup</small> &nbsp;&nbsp; <b>$1.25</b><small>/item add&rsquo;l location</small></span></div>
+                  </div>
+                </div>
+              </details>
+              <details class="mdisc">
+                <summary><span><span class="n">Silkscreen</span><span class="s">1 color/location included &middot; one-time setup $62.50 &middot; Up to 6 colors</span></span><span class="chev" aria-hidden="true"></span></summary>
+                <div class="mb">
+                  <p>Screen printing presses ink through a fine mesh stencil, laying down each color as a separate pass. Each color lays down as its own premixed spot ink, printing solid and consistent across the run. The applied mark is flat and opaque, sitting on top of the material with crisp edges; on heavy coverage, you can feel a slight raised texture where ink builds up. The cured ink is durable and holds up to repeated handling and washing.</p>
+                  <div class="kv">
+                    <div><span class="k">Locations</span><span class="v">Front Pocket, Flap</span></div>
+                    <div><span class="k">Max colors</span><span class="v">Up to 6 colors</span></div>
+                    <div><span class="k">Minimum order</span><span class="v">20 pieces</span></div>
+                    <div><span class="k">Included</span><span class="v"><span class="okg">&#10003; One-color imprint in one location</span> &mdash; one-time setup $62.50 applies</span></div>
+                    <div><span class="k">Charges</span><span class="v"><b>$62.50</b> <small>one-time setup</small> &nbsp;&nbsp; <b>$0.63</b><small>/item add&rsquo;l color</small> &nbsp;&nbsp; <b>$1.25</b><small>/item add&rsquo;l location</small></span></div>
+                  </div>
+                </div>
+              </details>
+              <details class="mdisc">
+                <summary><span><span class="n">Heat Transfer</span><span class="s">one-time setup $85.00 &middot; Up to 4 colors</span></span><span class="chev" aria-hidden="true"></span></summary>
+                <div class="mb">
+                  <p>Heat transfer prints your design in premixed spot inks onto a film, then bonds that film to the surface under heat and pressure. Each color goes down as its own solid ink, so edges stay crisp and color stays even across the mark. The result reads as a smooth, thin bonded layer &mdash; low-profile and flexible enough to move with the fabric, not ink soaked into the cloth.</p>
+                  <div class="kv">
+                    <div><span class="k">Locations &amp; sizes</span><span class="v">Front Pocket 5" W &times; 4" H, Flap 4" W &times; 4" H</span></div>
+                    <div><span class="k">Max colors</span><span class="v">Up to 4 colors</span></div>
+                    <div><span class="k">Minimum order</span><span class="v">20 pieces</span></div>
+                    <div><span class="k">Charges</span><span class="v"><b>$85.00</b> <small>one-time setup</small> &nbsp;&nbsp; <b>$0.63</b><small>/item add&rsquo;l color</small> &nbsp;&nbsp; <b>$1.25</b><small>/item add&rsquo;l location</small></span></div>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </details>
+
+          <!-- ======== NEW §4.5 — Delivery block replaces "Production & Shipping".
+               Same accordion idiom: h2 + 13px summary that carries the selected option's ship date.
+               Body: production line for the selected option → ZIP estimator → options table → footnote. ======== -->
+          <details class="acc" id="deliveryBlock" open>
+            <summary><h2>Delivery</h2><span class="sum" id="dlvSum"></span><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body">
+              <p class="dlv-prod" id="dlvProd"></p>
+              <div class="zip">
+                <div><label for="zipIn">Your ZIP</label><input id="zipIn" type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="53202" autocomplete="postal-code"></div>
+                <button class="btn-outline" id="zipGo" type="button">Update dates</button>
+              </div>
+              <p class="zip-status" id="zipStatus" aria-live="polite"></p>
+              <table class="dlv-t" id="dlvTable" aria-label="Shipping options">
+                <thead><tr><th scope="col">Option</th><th scope="col">Arrives as early as</th><th scope="col">Typical price</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <p class="dlv-fn">Exact shipping price depends on your address &mdash; shown at checkout, or ask us in chat.</p>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary><h2>Quick answers</h2><span class="sum">Minimums, pricing, setup, turnaround and decoration</span><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body">
+              <p><strong style="color:var(--ink)">What is the minimum order quantity?</strong><br>The minimum order is 20 pieces with Embroidery.</p>
+              <p style="margin-top:12px"><strong style="color:var(--ink)">Is there a setup charge?</strong><br>Yes &mdash; a one-time setup charge of $12.50 per order. The imprint itself is included in the unit price.</p>
+              <p style="margin-top:12px"><strong style="color:var(--ink)">How long does production take?</strong><br>Production takes 4 business days after proof approval; a free digital proof is e-mailed within 24 hours of receiving artwork. Rush production in 1 business day is available for a fee, starts as soon as print-ready artwork is uploaded, and skips the proof-approval wait.</p>
+            </div>
+          </details>
+          <details class="acc" id="pp-questions" open>
+            <summary><h2>Questions &amp; Answers</h2><span class="sum">Ask about sizing, imprinting or turnaround</span><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body">
+              <div style="border:1px solid var(--input-border);border-radius:24px;padding:10px 16px;font-size:14px;color:var(--muted)">Ask a question&hellip;</div>
+              <p style="font-size:14px;font-weight:700;color:var(--ink);margin-top:16px;border-bottom:1px solid var(--rule);padding-bottom:6px">Popular Questions</p>
+              <p style="font-size:14px;margin-top:10px">No questions yet &mdash; ask the first one and we'll answer it.</p>
+            </div>
+          </details>
+          <details class="acc">
+            <summary><h2>Customer Reviews</h2><span class="sum">No product reviews yet</span><span class="chev" aria-hidden="true"></span></summary>
+            <div class="acc-body"><p style="font-size:14px;color:var(--muted)">No product reviews yet for this item.</p></div>
+          </details>
+          <div class="skuline">SKU: SVR0000106 <span class="st">IN STOCK</span></div>
+        </div>
+      </div>
+
+      <!-- ================= RIGHT COLUMN — BUY BOX ================= -->
+      <div class="buybox">
+        <p class="bb-sku">SKU: SVR0000106</p>
+        <h1 class="bb-h1">12 Can Lakeside Cooler Bag</h1>
+        <!-- NEW §4.5 (4): text badge replaces the /rush image link; it scrolls to and focuses the selector -->
+        <div class="bb-badges" id="badgeRow"><button class="badge badge-btn" id="rushBadge" type="button">24-Hour Rush available</button></div>
+        <p class="bb-tag">Ideal for travel, trade shows, and employee kits.</p>
+        <p class="bb-desc">This 12-can cooler bag is made from rugged 600 denier heather polyester. Your logo can be embroidered, screen printed, or heat transferred onto the front or back.</p>
+
+        <div class="bb-setup">
+          <!-- ---- steps 1–2 (production, unchanged) ---- -->
+          <div id="stepsTop">
+            <h2 class="stephd"><span class="n" aria-hidden="true">1</span>Colors</h2>
+            <fieldset style="border:0;padding:0;margin:0 0 4px" aria-label="Colors">
+              <div class="swatches" id="swatches" role="radiogroup" aria-label="Product color"></div>
+              <p class="colorname" id="colorName" aria-live="polite">Navy Heather</p>
+            </fieldset>
+
+            <h2 class="stephd"><span class="n" aria-hidden="true">2</span>Quantity</h2>
+            <div class="tierwrap"><table class="tier" id="tierTable"><caption class="sr">Price per unit by quantity. Choose a quantity by activating a column.</caption><tbody></tbody></table></div>
+            <div class="qtyrow">
+              <label><span class="lab">Quantity</span><input id="qtyIn" type="text" inputmode="numeric" pattern="[0-9]*" value="20"></label>
+              <div><span class="lab">Unit price <button class="info-i" type="button" aria-label="What the unit price includes" title="Base price per item. Includes one standard imprint. Additional imprint locations or decoration methods are extra.">i</button></span><output id="unitOut" for="qtyIn">$21.74</output></div>
+            </div>
+          </div>
+
+          <!-- ---- steps 3–4 (production configurator; §4.4 reconfigures it under Rush) ---- -->
+          <div id="stepsWizard" hidden>
+            <div class="recap"><p><span class="n" aria-hidden="true">1&ndash;2</span><b id="recapColor">Navy Heather</b> &middot; <span id="recapQty">20</span> pieces</p><button class="tbtn" id="recapEdit" type="button">Edit color &amp; quantity</button></div>
+
+            <h2 class="stephd"><span class="n" aria-hidden="true">3</span>Decoration Method</h2>
+            <!-- Standard: production radiogroup (three cards, descriptions verbatim) -->
+            <div class="methcards" id="methCards" role="radiogroup" aria-label="Decoration method">
+              <button type="button" role="radio" class="card" data-m="emb"><span class="nm">Embroidery</span><span class="pill">Full Color</span><span class="ds">Your design stitched in colored thread directly into the fabric, leaving a raised, textured mark with the soft sheen and dimensionality of real stitching.</span></button>
+              <button type="button" role="radio" class="card" data-m="silk"><span class="nm">Silkscreen</span><span class="pill">Max 6 colors</span><span class="ds">Ink pushed through a mesh stencil onto the surface, leaving crisp, opaque color artwork that sits right on top of the material.</span></button>
+              <button type="button" role="radio" class="card" data-m="heat"><span class="nm">Heat Transfer</span><span class="pill">Max 4 colors</span><span class="ds">Spot-color artwork printed in premixed solid inks onto a film, then heat-bonded to the surface as a smooth, thin applied layer that flexes with the material.</span></button>
+            </div>
+            <!-- NEW §4.4: under Rush the radiogroup is replaced by one read-only card (copy deck "Locked method card") -->
+            <div id="methLocked" hidden style="margin-bottom:16px">
+              <div class="card on locked" aria-describedby="methLockedHelp"><span class="nm">Embroidery</span><span class="pill">Full Color</span><span class="ds" style="color:var(--ink)">Rush default.</span></div>
+              <p id="methLockedHelp" style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5"><button class="tbtn" id="switchStd" type="button">Switch to Standard</button> to choose another method.</p>
+            </div>
+
+            <details class="disc"><summary>Will It Work For My Artwork?<span class="chev" aria-hidden="true"></span></summary><div class="db">Vector artwork (AI, EPS, PDF, SVG) reproduces best. Fine text below 0.25" and thin lines may fill in with thread.</div></details>
+            <button class="howlink" type="button" id="howLink">How Embroidery works</button>
+            <div class="notebox" id="methNote"><span class="ck" aria-hidden="true">&#10003;</span><p><strong>First imprint free</strong> &mdash; full color, one location, one-time setup $12.50 applies.<span class="sub" id="methNoteSub">Add locations below &mdash; extras are priced separately.</span></p></div>
+            <div class="chgbox"><table class="chg"><thead><tr><th scope="col">Decoration Charges</th><th scope="col">Setup</th><th scope="col">Run Charge</th></tr></thead><tbody id="chgBody"></tbody></table></div>
+
+            <h2 class="stephd"><span class="n" aria-hidden="true">4</span>Imprint Details</h2>
+            <div class="imp">
+              <div class="upl-row">
+                <!-- Standard: production text-button. Rush: primary-styled (solid navy) button, copy deck "Upload button (rush)" -->
+                <button class="tbtn" id="uplStd" type="button">Upload artwork and instructions (optional)</button>
+                <button class="btn-navy" id="uplRush" type="button" hidden>Upload artwork &mdash; starts your Rush clock at checkout</button>
+              </div>
+              <p class="recv" id="uplRecv" hidden aria-live="polite"></p>
+              <div style="margin-top:12px">
+                <label class="lab" for="locSel" id="locLab">Imprint location</label>
+                <select id="locSel"><option value="Front Pocket">Front Pocket</option><option value="Flap">Flap</option></select>
+                <!-- NEW §4.4: location as plain text under Rush (B-PDP042) -->
+                <p class="plain" id="locPlain" hidden>Front Pocket</p>
+              </div>
+              <div class="row">
+                <div><span class="lab">Imprint Colors</span><span class="plain" id="impColors">Full Color</span></div>
+                <div class="cost">Imprint #1 cost: <b id="impCost">$12.50</b> <button class="info-i" type="button" aria-label="How the imprint #1 cost is made up" title="Imprint Method Setup $12.50 · Imprint Method Run Charge Free">i</button></div>
+              </div>
+            </div>
+            <div class="addloc" id="addLocWrap"><button class="tbtn" type="button" id="addLoc">+ Add another imprint location</button></div>
+          </div>
+
+          <!-- ======== NEW §4.3 — Production & delivery selector (replaces the "Rush service" checkbox row;
+               same slot: between the quantity/configurator and the Subtotal). Persists across steps 1–2 and 3–4. ======== -->
+          <div class="pd" id="pdSel">
+            <h3 class="pd-h" id="pdHeading">Production &amp; delivery</h3>
+            <fieldset role="radiogroup" aria-labelledby="pdHeading">
+              <label class="opt on" id="optStd" for="rStd">
+                <span class="top"><input type="radio" name="tier" id="rStd" value="standard" checked aria-labelledby="stdName stdFee" aria-describedby="stdDates stdHelp"><span class="tier-nm" id="stdName">Standard</span><span class="fee" id="stdFee">included</span></span>
+                <span class="dates" id="stdDates"></span>
+                <span class="help" id="stdHelp">Free digital proof first &mdash; production starts after you approve</span>
+              </label>
+              <label class="opt" id="optRush" for="rRush">
+                <span class="top"><input type="radio" name="tier" id="rRush" value="rush" aria-expanded="false" aria-controls="rushTimeline" aria-labelledby="rushName rushFee" aria-describedby="rushDates rushHelp"><span class="tier-nm" id="rushName">24-Hour Rush</span><span class="fee" id="rushFee">+ $39.00</span></span>
+                <span class="dates" id="rushDates"></span>
+                <span class="help" id="rushHelp">No proof round &middot; default imprint only</span>
+                <!-- the card expands into the timeline (§4.3 "What happens next") -->
+                <div class="tl" id="rushTimeline" role="region" aria-label="What happens next" hidden>
+                  <h3>What happens next</h3>
+                  <ol>
+                    <li id="tl1"></li>
+                    <li id="tl2"></li>
+                    <li id="tl3"></li>
+                    <li id="tl4"></li>
+                  </ol>
+                  <p class="ln" id="tlArt"></p>
+                  <p class="ln">Most suppliers start a &ldquo;24-hour&rdquo; clock only after you approve a proof.</p>
+                </div>
+              </label>
+            </fieldset>
+          </div>
+          <!-- NEW §4.3 non-rush products: one line, no cards (B-PDP042) -->
+          <p class="pd-line" id="pdLine" hidden></p>
+          <p class="pd-link"><a class="tbtn" href="#deliveryBlock" id="dlvLink">Delivery options and exact dates for your ZIP &darr;</a></p>
+
+          <!-- subtotal — production; NEW: "Rush fee (once per order)" line above the total (§4.3 fee display) -->
+          <div class="subtotal" id="subtotal">
+            <div class="r fee" id="feeLine" hidden><span>Rush fee (once per order)</span><span id="feeAmt">$39.00</span></div>
+            <div class="r"><span class="k">Subtotal:</span><span class="amt" id="subAmt">$447.30</span></div>
+            <div class="r sm"><span id="subPieces" aria-live="polite">20 pieces</span><span id="subEach">Price each: $21.74</span></div>
+            <button class="tbtn" id="brkBtn" type="button" style="margin-top:6px">See price breakdown</button>
+          </div>
+          <button class="cta-primary" id="ctaPrimary" type="button">Customize Your Product</button>
+          <div class="bb-foot"><p>Have a product question? <a href="#pp-questions">Ask us</a></p><button class="sec" type="button">&#128274; Secure Transaction</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- cross-sell strip — reproduction (last element, B-PDP004) -->
+    <section class="related" aria-label="Related products">
+      <div class="rel-tabs"><button class="on" type="button">Related</button><button type="button">Premium Picks</button><button type="button">Lower Price</button><button type="button">Lower Minimum</button><button type="button">Faster</button><button type="button">Other Imprint Styles</button></div>
+      <div class="rel-grid">
+        <div class="rel-card"><div class="ph"></div><div class="nm">12 Can Frosty Cooler Bag</div><div class="sk">HPG0012823</div><div class="pr">Starting At <b>$44.36</b></div></div>
+        <div class="rel-card"><div class="ph"></div><div class="nm">12 Can Sidekick Cooler Insulated Bag</div><div class="sk">SVR0000100</div><div class="pr">Starting At <b>$17.73</b></div></div>
+        <div class="rel-card"><div class="ph"></div><div class="nm">12-Can Convertible Duffel Cooler, 2-in-1 Bag</div><div class="sk">SVR0001</div><div class="pr">Starting At <b>$23.99</b></div></div>
+        <div class="rel-card"><div class="ph"></div><div class="nm">12-Can Heather Cooler Bag</div><div class="sk">SVR0000080</div><div class="pr">Starting At <b>$18.90</b></div></div>
+        <div class="rel-card"><div class="ph"></div><div class="nm">18 Can Beach Club Cooler-Lunch &amp; Travel Bag</div><div class="sk">SVR0000098</div><div class="pr">Starting At <b>$29.00</b></div></div>
+        <div class="rel-card"><div class="ph"></div><div class="nm">24 Can Convertible Cooler-Insulated Bag</div><div class="sk">SVR0000045</div><div class="pr">Starting At <b>$32.50</b></div></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="contact-banner">
+    <h2>Chat with or Call Our Friendly Wisconsin Staff</h2>
+    <p>Questions about uploading artwork? Or pricing, options, process, or anything else? Use the <b>live chat</b> on the lower right of this page, or call us at <b>1 (844) 667-7666</b> during office hours to speak to a friendly, helpful professional. Promotion Pros is a family-owned business in West Bend, WI with a decades-long history supporting businesses locally, regionally, and nationwide. You'll always get a helpful professional if you reach out for support &mdash; never a robot!</p>
+  </div>
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="cols">
+        <div><h4>INFORMATION</h4><a href="#">Terms of Use</a><a href="#">Shipping Information</a><a href="#">Return Policy</a><a href="#">Artwork Guidelines</a><a href="#">Accessibility Statement</a></div>
+        <div><h4>CUSTOMER SERVICE</h4><a href="#">Search</a><a href="#">Reviews</a><a href="#">Blog</a><a href="#">About Us</a></div>
+        <div><h4>MY ACCOUNT</h4><a href="#">My account</a><a href="#">Orders</a><a href="#">Addresses</a><a href="#">Shopping cart</a></div>
+        <div><h4>CONTACT</h4><p>131 N Main St, West Bend, WI 53095</p><p>262 429 1300</p><p>info@promotionpros.com</p></div>
+      </div>
+      <div class="copy">&copy; 2026 Promotion Pros &mdash; Branded Merchandise and Promotional Products. All rights reserved.</div>
+    </div>
+  </footer>
+</div>
+
+<!-- §4.8 mobile: sticky CTA bar with the compact rush line -->
+<div class="mobile-bar" id="mobileBar">
+  <div class="line"><span id="mbLine"></span><span class="tot" id="mbTot"></span></div>
+  <button class="go" id="mbGo" type="button">Customize Your Product</button>
+</div>
+<button class="olark" id="olark" type="button">&#9679; Chat</button>
+
+<!-- ============================================================
+     DIALOGS — one shell (react-modal idiom: white, 600px, 4px), focus trap + Escape
+     ============================================================ -->
+<!-- Upload dialog — production "Sending us artwork — Front Pocket"; lead copy switches with the tier (§4.4) -->
+<div class="back" id="backUpl">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="uplTitle" tabindex="-1" id="dlgUpl">
+    <div class="dlg-h"><h2 id="uplTitle">Sending us artwork &mdash; Front Pocket</h2><button class="dlg-x" type="button" aria-label="Close" data-close="upl">&times;</button></div>
+    <div class="dlg-b">
+      <p id="uplLead"></p>
+      <div class="drop" id="drop">
+        <button class="btn-ghost" type="button" id="chooseBtn">Choose a file</button>
+        <p class="hint">AI, EPS, PDF, SVG, PNG or JPG &middot; up to 25 MB</p>
+        <!-- prototype-only fake file chooser -->
+        <div class="chooser" id="chooser" hidden>
+          <div class="ch-h">Prototype: sample files on this computer</div>
+          <button type="button" data-file="logo.ai">logo.ai <span>vector &middot; 214 KB</span></button>
+          <button type="button" data-file="logo.jpg">logo.jpg <span>raster 640&times;480 &middot; 88 KB</span></button>
+        </div>
+      </div>
+      <div class="filerow" id="fileRow" hidden><span><b id="fileName"></b><span class="meta" id="fileMeta"></span></span><button class="tbtn" type="button" id="fileRemove">Remove</button></div>
+      <div class="band amber" id="lowRes" hidden>This file may print soft at imprint size. Continue with Rush, or <button class="tbtn" type="button" id="lowResSwitch">switch to Standard</button> for a free proof.</div>
+      <div class="instr"><label for="instrTa">Instructions (optional)</label><textarea id="instrTa" placeholder="Thread colors, placement notes, PMS numbers&hellip;"></textarea></div>
+    </div>
+    <div class="dlg-f"><button class="btn-ghost" type="button" data-close="upl">Cancel</button><button class="btn-primary" type="button" id="uplDone">Done</button></div>
+  </div>
+</div>
+
+<!-- Price breakdown — production dialog lines + the rush fee next to Imprint Method Setup (§4.3) -->
+<div class="back" id="backBrk">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="brkTitle" tabindex="-1" id="dlgBrk">
+    <div class="dlg-h"><h2 id="brkTitle">Price breakdown</h2><button class="dlg-x" type="button" aria-label="Close" data-close="brk">&times;</button></div>
+    <div class="dlg-b brk" id="brkBody"></div>
+    <div class="dlg-f"><button class="btn-ghost" type="button" data-close="brk">Close</button></div>
+  </div>
+</div>
+
+<!-- Added to cart — confirmation panel (brief; B-PDP037: confirm, then 2–3 next steps). §4.6 cart page is out of scope. -->
+<div class="back" id="backConf">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="confTitle" tabindex="-1" id="dlgConf">
+    <div class="dlg-h"><h2 id="confTitle" class="conf-ok"><span aria-hidden="true">&#10003;</span>Added to cart</h2><button class="dlg-x" type="button" aria-label="Close" data-close="conf">&times;</button></div>
+    <div class="dlg-b">
+      <div class="conf-prod"><img id="confImg" alt=""><div><div class="nm">12 Can Lakeside Cooler Bag</div><div class="cf" id="confCfg"></div></div></div>
+      <ul class="conf-lines" id="confLines"></ul>
+    </div>
+    <div class="dlg-f"><button class="btn-ghost" type="button" data-close="conf">Continue shopping</button><button class="btn-primary" type="button" id="viewCart">View cart</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="sr" id="live" aria-live="polite"></div>
+
+<!-- ============================================================
+     PRODUCT DATA — inline, from the 2026-09-09 production capture (brief "Product data")
+     ============================================================ -->
+<script type="application/json" id="productData">
+{
+  "sku": "SVR0000106",
+  "name": "12 Can Lakeside Cooler Bag",
+  "images": {
+    "base": "https://product-images.promotionpros.com/cloud-images-63/LG-636/",
+    "ids": ["media_314945952", "media_314945953", "media_314945954"]
+  },
+  "colors": [["Navy Heather", "rgb(0,7,19)"], ["Gray Heather", "rgb(160,160,160)"]],
+  "tiers": [[20, 21.74], [100, 20.99], [300, 20.29], [600, 19.32]],
+  "methods": {
+    "emb":  {"name": "Embroidery",    "colors": "Full Color", "setup": 12.50, "extraSetup": 12.50, "extraRun": 1.25, "note": "full color, one location, one-time setup $12.50 applies."},
+    "silk": {"name": "Silkscreen",    "colors": "1 color",    "setup": 62.50, "extraSetup": 62.50, "extraRun": 1.25, "note": "one color, one location, one-time setup $62.50 applies."},
+    "heat": {"name": "Heat Transfer", "colors": "1 color",    "setup": 85.00, "extraSetup": 85.00, "extraRun": 1.25, "note": "one color, one location, one-time setup $85.00 applies."}
+  },
+  "locations": ["Front Pocket", "Flap"],
+  "rush": {"tier": "24-Hour", "days": 1, "fee": 39.00, "method": "emb", "location": "Front Pocket", "cutoffHour": 12, "cutoffLabel": "12:00 PM CT"},
+  "standard": {"proofDays": 1, "productionDays": 4},
+  "shipping": [
+    {"name": "Ground",    "lo": 2, "hi": 4, "price": "$18–45"},
+    {"name": "2Day",      "lo": 2, "hi": 2, "price": "$35–80"},
+    {"name": "Overnight", "lo": 1, "hi": 1, "price": "$60–140"}
+  ],
+  "clock": {"before": "2026-09-09T11:00:00", "near": "2026-09-09T11:15:00", "after": "2026-09-09T13:30:00"},
+  "zip": "53202"
+}
+</script>
+
+<script>
+/* ============================================================
+   STATE MACHINE — one S object, one renderAll(); controls mutate S then re-render.
+   ============================================================ */
+var D = JSON.parse(document.getElementById('productData').textContent);
+var S;
+function initial(){
+  return { product:'rush', clock:'before', artwork:null, tier:'standard', cfgOpen:false,
+           method:'emb', loc:'Front Pocket', prevMethod:null, prevLoc:null,
+           color:0, qty:20, zip:D.zip, zipApplied:false, added:false, gal:0 };
+}
+S = initial();
+var openedAt = Date.now();   /* simulated clock advances in real time from the chosen chip */
+
+function $(id){ return document.getElementById(id); }
+function usd(n){ return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function show(el,on){ if(!el) return; if(on) el.removeAttribute('hidden'); else el.setAttribute('hidden',''); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('on');},2600); }
+function announce(m){ $('live').textContent = m; }
+
+/* ---------- business-day calendar (Mon–Fri, no holidays in range — brief) ---------- */
+function isBiz(d){ var w=d.getDay(); return w!==0 && w!==6; }
+function addBiz(d,n){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),12); while(!isBiz(x)) x.setDate(x.getDate()+1); while(n>0){ x.setDate(x.getDate()+1); if(isBiz(x)) n--; } return x; }
+function lab(d){ return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
+function nowSim(){ return new Date(new Date(D.clock[S.clock]).getTime() + (Date.now()-openedAt)); }
+function calc(){
+  var now = nowSim();
+  var today = new Date(now.getFullYear(),now.getMonth(),now.getDate(),12);
+  var cutoff = new Date(now.getFullYear(),now.getMonth(),now.getDate(),D.rush.cutoffHour,0,0);
+  var before = now < cutoff;
+  var start = before ? addBiz(today,0) : addBiz(today,1);           /* production start day */
+  var rushShip = addBiz(start, D.rush.days);
+  var stdShip = addBiz(today, D.standard.proofDays + D.standard.productionDays);
+  var minsLeft = before ? Math.max(0, Math.round((cutoff - now)/60000)) : null;
+  function arr(ship,n){ return addBiz(ship,n); }
+  return {
+    before:before, minsLeft:minsLeft, cutoffDay: before ? 'today' : lab(start),
+    rushShip:rushShip, rushOvn:arr(rushShip,1), rush2:arr(rushShip,2),
+    stdShip:stdShip, stdOvn:arr(stdShip,1), std2:arr(stdShip,2),
+    ship:function(t){ return t==='rush' ? rushShip : stdShip; }
+  };
+}
+function cd(m){ return m>=60 ? Math.floor(m/60)+'h '+(m%60)+'m' : m+'m'; }
+
+/* ---------- pricing ---------- */
+function unitFor(q){ var u=D.tiers[0][1]; for(var i=0;i<D.tiers.length;i++){ if(q>=D.tiers[i][0]) u=D.tiers[i][1]; } return u; }
+function price(){
+  var m=D.methods[S.method], unit=unitFor(S.qty), base=S.qty*unit, setup=m.setup;
+  var fee = (S.product==='rush' && S.tier==='rush') ? D.rush.fee : 0;
+  var total=base+setup+fee;
+  return {unit:unit, base:base, setup:setup, fee:fee, total:total, avg:total/S.qty, m:m};
+}
+function isRush(){ return S.product==='rush' && S.tier==='rush'; }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderGallery(){
+  var b=D.images.base, ids=D.images.ids;
+  $('galMain').src = b+'cv-details-size/'+ids[S.gal]+'.webp';
+  $('confImg').src = b+'cv-thumb-size/'+ids[0]+'.webp';
+  var h=''; for(var i=0;i<ids.length;i++) h+='<button type="button" class="'+(i===S.gal?'on':'')+'" aria-label="Image '+(i+1)+'" data-i="'+i+'"><img src="'+b+'cv-thumb-size/'+ids[i]+'.webp" alt=""></button>';
+  $('galThumbs').innerHTML=h;
+}
+function renderSwatches(){
+  var h='';
+  for(var i=0;i<D.colors.length;i++) h+='<button type="button" class="swatch'+(i===S.color?' on':'')+'" role="radio" aria-checked="'+(i===S.color)+'" aria-label="'+D.colors[i][0]+'" data-i="'+i+'"><span style="background:'+D.colors[i][1]+'"></span></button>';
+  $('swatches').innerHTML=h;
+  $('colorName').textContent=D.colors[S.color][0];
+}
+function renderTier(){
+  var r1='<tr><th scope="row">Minimum Quantity</th>', r2='<tr><th scope="row">Price per unit</th>';
+  for(var i=0;i<D.tiers.length;i++){
+    var on = S.qty>=D.tiers[i][0] && (i+1===D.tiers.length || S.qty<D.tiers[i+1][0]);
+    r1+='<td'+(on?' class="on"':'')+'><button type="button" data-q="'+D.tiers[i][0]+'"'+(on?' aria-current="true"':'')+' aria-label="'+D.tiers[i][0]+' pieces">'+D.tiers[i][0]+'</button></td>';
+    r2+='<td'+(on?' class="on"':'')+'><button type="button" data-q="'+D.tiers[i][0]+'"'+(on?' aria-current="true"':'')+' aria-label="'+usd(D.tiers[i][1])+' per unit at '+D.tiers[i][0]+' pieces">'+usd(D.tiers[i][1])+'</button></td>';
+  }
+  $('tierTable').querySelector('tbody').innerHTML=r1+'</tr>'+r2+'</tr>';
+}
+
+/* §4.3 selector, timeline, countdown */
+function renderSelector(c){
+  var rushOn = S.product==='rush';
+  show($('pdSel'), rushOn);
+  show($('pdLine'), !rushOn);
+  show($('badgeRow'), rushOn);
+  if(!rushOn){
+    $('pdLine').innerHTML = 'Ships <b>'+lab(c.stdShip)+'</b> &middot; arrives as early as '+lab(c.stdOvn)+' &middot; free digital proof first.';
+    return;
+  }
+  var r = S.tier==='rush';
+  $('rStd').checked = !r; $('rRush').checked = r;
+  $('optStd').classList.toggle('on', !r); $('optRush').classList.toggle('on', r);
+  $('rRush').setAttribute('aria-expanded', r ? 'true' : 'false');
+  show($('rushTimeline'), r);
+  $('stdDates').innerHTML = 'Ships as soon as <b>'+lab(c.stdShip)+'</b> &middot; arrives as early as '+lab(c.stdOvn);
+  /* conditional wording once added to cart without artwork (§4.4 Add to cart) */
+  if(S.added && !S.artwork && r)
+    $('rushDates').innerHTML = 'Ships <b>'+lab(c.rushShip)+'</b> once we have your artwork by '+D.rush.cutoffLabel;
+  else
+    $('rushDates').innerHTML = 'Ships <b>'+lab(c.rushShip)+'</b> &middot; arrives as early as '+lab(c.rushOvn);
+  show($('rushHelp'), !r);
+  /* timeline (copy deck verbatim) */
+  var m = D.methods[D.rush.method];
+  var step1 = 'Check out with your artwork by '+D.rush.cutoffLabel+' '+c.cutoffDay;
+  if(r && c.before && c.minsLeft!==null && c.minsLeft<60) step1 += ' <span class="cd" aria-live="polite">&middot; '+cd(c.minsLeft)+' left for this date</span>';
+  $('tl1').innerHTML = step1;
+  $('tl2').innerHTML = 'Production starts the same business day &mdash; no proof to wait for or approve; we print your artwork as sent, using this item&rsquo;s default imprint ('+m.name+' &middot; '+D.rush.location+')';
+  $('tl3').innerHTML = 'Ships <b>'+lab(c.rushShip)+'</b>';
+  $('tl4').innerHTML = 'Arrives as early as <b>'+lab(c.rushOvn)+'</b> with Overnight; '+lab(c.rush2)+' with 2Day &mdash; you choose shipping at checkout';
+  var art=$('tlArt');
+  if(S.artwork){ art.textContent='Artwork received — your clock starts at checkout.'; art.classList.add('recvd'); }
+  else { art.textContent='Artwork later? You can upload after checkout — your clock starts when we receive the file.'; art.classList.remove('recvd'); }
+}
+
+/* §4.5 Delivery block */
+function renderDelivery(c){
+  var r = isRush();
+  $('dlvSum').textContent = r ? 'ships '+lab(c.rushShip)+' ('+D.rush.tier+' Rush)' : 'ships as soon as '+lab(c.stdShip);
+  $('dlvProd').innerHTML = r
+    ? '<b>'+D.rush.tier+' Rush:</b> 1 business day, no proof, default imprint; checkout with artwork by '+D.rush.cutoffLabel+'.'
+    : '<b>Standard:</b> Free digital proof within 24 hours; 4 business days production after your approval.';
+  var ship = c.ship(r?'rush':'standard');
+  var h='';
+  for(var i=0;i<D.shipping.length;i++){
+    var o=D.shipping[i], lo=addBiz(ship,o.lo), hi=addBiz(ship,o.hi);
+    var date = (S.zipApplied || o.lo===o.hi) ? lab(lo) : lab(lo)+' – '+lab(hi);
+    h+='<tr><td class="opt">'+o.name+'</td><td>'+date+'</td><td class="rng">'+o.price+'</td></tr>';
+  }
+  $('dlvTable').querySelector('tbody').innerHTML=h;
+  $('zipStatus').textContent = S.zipApplied ? 'Arrival dates for ZIP '+S.zip+'.' : 'Enter your ZIP for one arrival date per option.';
+  $('zipIn').value = S.zip;
+}
+
+/* configurator, subtotal, CTA, mobile bar */
+function renderConfig(c){
+  var r = isRush(), p = price(), m = p.m;
+  show($('stepsTop'), !S.cfgOpen);
+  show($('stepsWizard'), S.cfgOpen);
+  $('recapColor').textContent=D.colors[S.color][0]; $('recapQty').textContent=S.qty;
+  $('qtyIn').value=S.qty; $('unitOut').value=usd(p.unit);
+  /* step 3 */
+  show($('methCards'), !r); show($('methLocked'), r);
+  var cards=$('methCards').querySelectorAll('.card');
+  for(var i=0;i<cards.length;i++){ var on=cards[i].getAttribute('data-m')===S.method; cards[i].classList.toggle('on',on); cards[i].setAttribute('aria-checked',on); }
+  $('howLink').textContent='How '+m.name+' works';
+  $('methNote').querySelector('p').innerHTML='<strong>First imprint free</strong> &mdash; '+m.note+(r?'':'<span class="sub">Add locations below &mdash; extras are priced separately.</span>');
+  $('chgBody').innerHTML='<tr><td>First Location</td><td>'+usd(m.setup)+'</td><td><span class="okg">Free</span></td></tr>'+
+    (r?'':'<tr><td>Extra Location</td><td>'+usd(m.extraSetup)+'</td><td>'+usd(m.extraRun)+' / item</td></tr>');
+  /* step 4 */
+  show($('uplStd'), !r); show($('uplRush'), r);
+  show($('uplRecv'), !!S.artwork);
+  if(S.artwork) $('uplRecv').innerHTML='<span class="fn">'+esc(S.artwork)+'</span> &middot; '+(r?'Received — your clock starts at checkout.':'Received.');
+  show($('locSel'), !r); show($('locPlain'), r);
+  $('locLab').setAttribute('for', r?'':'locSel'); $('locSel').value=S.loc; $('locPlain').textContent=S.loc;
+  $('impColors').textContent=m.colors; $('impCost').textContent=usd(m.setup);
+  show($('addLocWrap'), !r);
+  $('uplTitle').textContent='Sending us artwork — '+S.loc;
+  /* subtotal */
+  show($('feeLine'), p.fee>0); $('feeAmt').textContent=usd(p.fee);
+  $('subAmt').textContent=usd(p.total); $('subPieces').textContent=S.qty+' pieces'; $('subEach').textContent='Price each: '+usd(p.unit);
+  var ctaLabel = S.cfgOpen ? 'Add to cart' : 'Customize Your Product';
+  $('ctaPrimary').textContent=ctaLabel; $('mbGo').textContent=ctaLabel;
+  /* mobile bar: compact rush line (§4.8) */
+  $('mbLine').innerHTML = r ? 'Ships <b>'+lab(c.rushShip)+'</b> &middot; +'+usd(D.rush.fee).replace('.00','') : 'Ships as soon as '+lab(c.stdShip);
+  $('mbTot').textContent='Subtotal '+usd(p.total);
+}
+function renderChips(){
+  var chips=document.querySelectorAll('.chip[data-set]');
+  for(var i=0;i<chips.length;i++){ var k=chips[i].getAttribute('data-set'), v=chips[i].getAttribute('data-val');
+    var cur = k==='artwork' ? (S.artwork||'none') : S[k]; chips[i].classList.toggle('on', cur===v); }
+}
+function renderAll(){
+  var c=calc();
+  renderSwatches(); renderTier(); renderSelector(c); renderDelivery(c); renderConfig(c); renderChips();
+}
+/* countdown tick — only re-renders the countdown span when Rush is on and under the hour */
+setInterval(function(){ if(isRush()){ var c=calc(); if(c.before && c.minsLeft!==null && c.minsLeft<60) renderSelector(c); } }, 30000);
+
+/* ============================================================
+   INTERACTIONS
+   ============================================================ */
+function setTier(t, src){
+  if(S.tier===t) return;
+  S.tier=t;
+  if(t==='rush'){ S.prevMethod=S.method; S.prevLoc=S.loc; S.method=D.rush.method; S.loc=D.rush.location; }
+  else if(S.prevMethod){ S.method=S.prevMethod; S.loc=S.prevLoc; S.prevMethod=null; }
+  S.added=false;
+  renderAll();
+  announce(t==='rush' ? D.rush.tier+' Rush selected. Rush fee '+usd(D.rush.fee)+' added.' : 'Standard selected. Rush fee removed.');
+}
+$('rStd').addEventListener('change', function(){ if(this.checked) setTier('standard','pdp'); });
+$('rRush').addEventListener('change', function(){ if(this.checked) setTier('rush','pdp'); });
+$('switchStd').addEventListener('click', function(){ setTier('standard','configurator'); setTimeout(function(){ $('rStd').focus(); },30); });
+$('rushBadge').addEventListener('click', function(){
+  var el=$('pdSel'); el.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(function(){ $('rRush').focus(); }, 350);
+});
+$('dlvLink').addEventListener('click', function(e){ e.preventDefault(); $('deliveryBlock').open=true; $('deliveryBlock').scrollIntoView({block:'start',behavior:'smooth'}); setTimeout(function(){ $('zipIn').focus(); },400); });
+
+/* gallery / colors / tiers / qty */
+$('galThumbs').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; S.gal=+b.getAttribute('data-i'); renderGallery(); });
+$('swatches').addEventListener('click', function(e){ var b=e.target.closest('.swatch'); if(!b) return; S.color=+b.getAttribute('data-i'); renderAll(); });
+$('tierTable').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; S.qty=+b.getAttribute('data-q'); renderAll(); });
+$('qtyIn').addEventListener('change', function(){ var v=parseInt(this.value,10); if(!isNaN(v)&&v>=D.tiers[0][0]) S.qty=v; renderAll(); });
+
+/* configurator */
+$('ctaPrimary').addEventListener('click', primaryAction);
+$('mbGo').addEventListener('click', primaryAction);
+function primaryAction(){
+  if(!S.cfgOpen){ S.cfgOpen=true; renderAll(); $('stepsWizard').scrollIntoView({block:'start',behavior:'smooth'}); return; }
+  S.added=true; renderAll(); openConf();
+}
+$('recapEdit').addEventListener('click', function(){ S.cfgOpen=false; renderAll(); });
+$('methCards').addEventListener('click', function(e){ var b=e.target.closest('.card'); if(!b) return; S.method=b.getAttribute('data-m'); S.loc=D.locations[0]; renderAll(); announce('Imprint location reset to '+S.loc+' for '+D.methods[S.method].name); });
+$('methCards').addEventListener('keydown', function(e){
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft'&&e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
+  var keys=Object.keys(D.methods), i=keys.indexOf(S.method), n=(e.key==='ArrowRight'||e.key==='ArrowDown')?(i+1)%keys.length:(i+keys.length-1)%keys.length;
+  S.method=keys[n]; S.loc=D.locations[0]; renderAll(); $('methCards').querySelector('.card.on').focus(); e.preventDefault();
+});
+$('locSel').addEventListener('change', function(){ S.loc=this.value; renderAll(); });
+$('addLoc').addEventListener('click', function(){ toast('Production adds a second imprint block here — out of scope for this round.'); });
+$('howLink').addEventListener('click', function(){ toast('Production opens the method explainer here.'); });
+$('olark').addEventListener('click', function(){ toast('Olark chat widget placeholder.'); });
+
+/* ZIP estimator (§4.5) */
+function applyZip(){ var v=$('zipIn').value.replace(/\D/g,''); if(v.length!==5){ $('zipStatus').textContent='Enter a 5-digit ZIP.'; return; } S.zip=v; S.zipApplied=true; renderAll(); announce('Arrival dates updated for ZIP '+v); }
+$('zipGo').addEventListener('click', applyZip);
+$('zipIn').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); applyZip(); } });
+$('zipIn').addEventListener('change', applyZip);
+
+/* dev chips */
+document.querySelectorAll('.chip[data-set]').forEach(function(b){ b.addEventListener('click', function(){
+  var k=b.getAttribute('data-set'), v=b.getAttribute('data-val');
+  if(k==='artwork'){ S.artwork = v==='none' ? null : v; }
+  else if(k==='product'){ S.product=v; if(v==='none'){ S.tier='standard'; if(S.prevMethod){S.method=S.prevMethod;S.loc=S.prevLoc;S.prevMethod=null;} } }
+  else { S[k]=v; openedAt=Date.now(); }
+  renderAll();
+}); });
+$('chipReset').addEventListener('click', function(){ S=initial(); openedAt=Date.now(); renderGallery(); renderAll(); window.scrollTo(0,0); });
+
+/* ============================================================
+   DIALOGS — shared open/close, focus trap, Escape
+   ============================================================ */
+var openDlg=null, lastFocus=null;
+function openD(key){
+  lastFocus=document.activeElement; openDlg=key;
+  $('back'+key).classList.add('open'); document.body.style.overflow='hidden';
+  document.querySelector('.site').setAttribute('aria-hidden','true');
+  setTimeout(function(){ $('dlg'+key).focus(); },30);
+}
+function closeD(){
+  if(!openDlg) return;
+  $('back'+openDlg).classList.remove('open'); document.body.style.overflow='';
+  document.querySelector('.site').removeAttribute('aria-hidden');
+  openDlg=null; if(lastFocus&&lastFocus.focus) lastFocus.focus();
+}
+document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', closeD); });
+document.querySelectorAll('.back').forEach(function(b){ b.addEventListener('mousedown', function(e){ if(e.target===this) closeD(); }); });
+document.addEventListener('keydown', function(e){
+  if(!openDlg) return;
+  if(e.key==='Escape'){ closeD(); return; }
+  if(e.key==='Tab'){
+    var f=$('back'+openDlg).querySelectorAll('button,input,textarea,select,a[href]'), list=[];
+    for(var i=0;i<f.length;i++){ if(!f[i].disabled && f[i].offsetParent!==null) list.push(f[i]); }
+    if(!list.length) return;
+    var first=list[0], last=list[list.length-1];
+    if(e.shiftKey && (document.activeElement===first || document.activeElement===$('dlg'+openDlg))){ last.focus(); e.preventDefault(); }
+    else if(!e.shiftKey && document.activeElement===last){ first.focus(); e.preventDefault(); }
+  }
+});
+
+/* upload dialog (§4.4) */
+var pendingFile=null;
+function openUpload(){
+  pendingFile=S.artwork;
+  $('uplLead').textContent = isRush()
+    ? 'Rush orders print exactly what you upload — no proof is sent. Vector files (AI, EPS, PDF, SVG) print sharpest. You can also upload after checkout; production starts when we have your file.'
+    : 'You can upload art and instructions now, or after checkout. We e-mail a free digital proof before production starts.';
+  show($('chooser'), false); renderFile(); openD('Upl');
+}
+function renderFile(){
+  show($('fileRow'), !!pendingFile); show($('drop'), !pendingFile);
+  if(pendingFile){ $('fileName').textContent=pendingFile; $('fileMeta').textContent = pendingFile==='logo.jpg' ? ' · raster 640×480 · 88 KB' : ' · vector · 214 KB'; }
+  show($('lowRes'), pendingFile==='logo.jpg' && isRush());
+}
+$('uplStd').addEventListener('click', openUpload);
+$('uplRush').addEventListener('click', openUpload);
+$('chooseBtn').addEventListener('click', function(){ show($('chooser'), true); $('chooser').querySelector('button').focus(); });
+$('chooser').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; pendingFile=b.getAttribute('data-file'); show($('chooser'), false); renderFile(); });
+$('fileRemove').addEventListener('click', function(){ pendingFile=null; renderFile(); });
+$('lowResSwitch').addEventListener('click', function(){ S.artwork=pendingFile; closeD(); setTier('standard','upload'); toast('Switched to Standard — a free digital proof comes first.'); });
+$('uplDone').addEventListener('click', function(){ S.artwork=pendingFile; closeD(); renderAll(); if(S.artwork) announce(S.artwork+' received'); });
+
+/* price breakdown (§4.3, 4.4 "See price breakdown includes it") */
+$('brkBtn').addEventListener('click', function(){
+  var p=price(), m=p.m, h='';
+  h+='<div class="r"><span>Base Item Price</span><span>'+S.qty+' × '+usd(p.unit)+' = '+usd(p.base)+'</span></div>';
+  h+='<div class="r lab"><span>Decoration method: '+esc(m.name)+'</span><span></span></div>';
+  h+='<div class="r lab"><span>Imprint 1 — '+esc(S.loc)+', '+esc(m.colors)+' '+esc(m.name)+'</span><span></span></div>';
+  h+='<div class="r"><span>Imprint Method Setup</span><span>'+usd(p.setup)+'</span></div>';
+  if(p.fee) h+='<div class="r"><span>Rush fee (once per order)</span><span>'+usd(p.fee)+'</span></div>';
+  h+='<div class="r"><span>Imprint Method Run Charge</span><span>Free</span></div>';
+  h+='<div class="r tot"><span>Total Price</span><span>'+usd(p.total)+'</span></div>';
+  h+='<div class="r"><span>Average price per unit</span><span>'+usd(p.avg)+' per unit</span></div>';
+  h+='<p class="fn">Taxes and delivery costs are not included. They will be calculated at checkout.</p>';
+  $('brkBody').innerHTML=h; openD('Brk');
+});
+
+/* added-to-cart confirmation panel */
+function openConf(){
+  var c=calc(), p=price(), r=isRush(), m=p.m, h='';
+  $('confCfg').textContent = D.colors[S.color][0]+' · '+S.qty+' pieces · '+m.name+' on '+S.loc+' · '+m.colors;
+  if(r){
+    h+='<li><span class="k">Production</span>'+D.rush.tier+' Rush · ships <b>'+lab(c.rushShip)+'</b>'+(S.artwork ? '' : ' once we have your artwork by '+D.rush.cutoffLabel)+'</li>';
+    h+='<li><span class="k">Delivery</span>Arrives as early as '+lab(c.rushOvn)+' — shipping chosen at checkout</li>';
+    h+='<li class="fee"><span>Rush fee (once per order)</span><span>'+usd(p.fee)+'</span></li>';
+    h+='<li><span class="k">Proof</span>No proof — '+(S.artwork ? 'we print the artwork you uploaded ('+esc(S.artwork)+').' : 'we print your artwork as sent.')+'</li>';
+    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : '<button class="tbtn" type="button" id="confUpload">Upload artwork to start your Rush clock</button>')+'</li>';
+  } else {
+    h+='<li><span class="k">Production</span>Standard · ships as soon as '+lab(c.stdShip)+' · arrives as early as '+lab(c.stdOvn)+'</li>';
+    h+='<li><span class="k">Proof</span>Free digital proof first — production starts after you approve.</li>';
+    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : 'Not uploaded yet — you can send it after checkout.')+'</li>';
+  }
+  h+='<li class="fee"><span><b style="color:var(--ink)">Subtotal</b></span><span><b style="color:var(--ink)">'+usd(p.total)+'</b></span></li>';
+  $('confLines').innerHTML=h;
+  var cu=$('confUpload'); if(cu) cu.addEventListener('click', function(){ closeD(); openUpload(); });
+  openD('Conf');
+}
+$('viewCart').addEventListener('click', function(){ toast('Cart page — out of scope for this prototype (spec §4.6).'); });
+
+/* boot */
+renderGallery(); renderAll();
+</script>
+</body>
+</html>
