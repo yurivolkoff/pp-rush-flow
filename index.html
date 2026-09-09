@@ -123,7 +123,7 @@ img{max-width:100%}
 /* Accordions — production <details class="pdp-disclosure">: h2 18px/700 + 13px summary + chevron */
 .accs{margin-top:22px}
 details.acc{border-top:1px solid var(--rule)}
-details.acc>summary{display:flex;align-items:center;gap:12px;padding:16px 16px;cursor:pointer;list-style:none}
+details.acc>summary{display:flex;align-items:center;gap:12px;padding:16px 16px;cursor:pointer;list-style:none;flex-wrap:wrap}
 details.acc>summary::-webkit-details-marker{display:none}
 details.acc>summary:hover{background:var(--surface)}
 details.acc>summary h2{font-size:18px;line-height:1.4;font-weight:700;color:var(--ink)}
@@ -166,6 +166,11 @@ details.acc[open]>summary .chev{transform:rotate(-135deg) translateY(-2px)}
 .dlv-t td{padding:10px 12px;border-bottom:1px solid var(--rule);color:var(--ink);vertical-align:top}
 .dlv-t td.oname{font-weight:700}
 .dlv-t td.rng{color:var(--body);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+/* Y8: 600 ms wash highlight after a ZIP update */
+.dlv-t td{transition:background-color .3s}
+.dlv-t tr.flash td{background:var(--wash)}
+/* Y1(c): Delivery header teaser line in the Standard state */
+.dlv-tease{display:block;width:100%;font-size:13px;color:var(--muted);margin-top:2px}
 .dlv-fn{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5}
 .nw{white-space:nowrap}
 
@@ -284,6 +289,16 @@ a.tbtn{display:inline-block}
 .opt .dates b{font-weight:700}
 .opt .dates .d2lead{display:none}
 .opt .help{display:block;margin:2px 0 0 24px;font-size:13px;color:var(--muted);line-height:1.5}
+.opt .dates .cond{display:block}
+.opt .dates .cond b{font-weight:700}
+/* Y2: visible amber notice when Rush replaces a chosen method / location (card + mirrored at the top of step 3) */
+.notice{display:flex;align-items:flex-start;gap:10px;background:var(--amber-bg);border:1px solid var(--amber-rule);border-radius:4px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--amber-ink);margin:8px 0 0 24px}
+.notice p{flex:1;margin:0}
+.notice .tbtn{color:var(--amber-ink);font-size:14px}
+.notice .nx{background:none;border:0;padding:0;font-size:20px;line-height:1;color:var(--amber-ink);flex:none;min-height:0;cursor:pointer}
+.notice.step3{margin:0 0 10px}
+/* Y4: visible status line above the method radios */
+.status-line{font-size:13px;color:var(--in-stock);font-weight:700;line-height:1.5;margin-bottom:8px}
 /* X14–X16: compact timeline — 14px body prose, plain "1." numerals, 8px between steps */
 .tl{margin:8px 0 0;border-top:1px solid var(--rule);padding-top:8px}
 .tl h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.45}
@@ -390,7 +405,14 @@ a.tbtn{display:inline-block}
    RESPONSIVE — §4.8 mobile
    ============================================================ */
 @media (max-width:960px){
-  .pdp-grid{grid-template-columns:minmax(0,1fr);gap:26px}
+  /* Y1: mobile source order = gallery → H1 + badge → buy box → Key Facts → accordions (production's wrapper→contents technique) */
+  .pdp-grid{display:flex;flex-direction:column;gap:0}
+  .col-left,.col-right{display:contents}
+  .gallery{order:1}
+  .bb-title{order:2;margin-top:24px}
+  .bb-setup{order:3}
+  .keyfacts{order:4;margin-top:26px}
+  .accs{order:5}
   .buybox{position:static}
   .gal-main img{height:260px}
   .site-foot .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -401,15 +423,17 @@ a.tbtn{display:inline-block}
   /* sticky CTA bar — keeps Add to cart / Customize; compact rush line above it (§4.8) */
   .mobile-bar{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;
     border-top:1px solid var(--rule);box-shadow:0 -4px 16px rgba(0,0,0,.10);padding:8px 14px 10px;gap:6px}
-  /* X20: ship date regular, subtotal amount bold */
-  .mobile-bar .line{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+  /* X20: ship date regular, subtotal amount bold; Y1(b): Standard-state teaser text-button */
+  .mobile-bar .line{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+  .mobile-bar .line .tbtn{font-size:14px;min-height:0;display:inline}
   .mobile-bar .line .tot{color:var(--body)}
   .mobile-bar .line .tot b{color:var(--ink);font-weight:700}
   /* X2: 19px/700 white on orange = large-text exemption */
   .mobile-bar .go{width:100%;min-height:48px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:19px;font-weight:700}
-  .site{padding-bottom:110px}
-  .olark{bottom:118px;padding:10px 16px;font-size:13px}
-  .toast{bottom:126px}
+  .site{padding-bottom:0}
+  body{padding-bottom:calc(var(--barh,100px) + 8px)}
+  .olark{bottom:calc(var(--barh,100px) + 12px);padding:10px 16px;font-size:13px}
+  .toast{bottom:calc(var(--barh,100px) + 20px)}
   .state-chips .lbl{min-width:0;width:100%}
   /* §4.8 Delivery table collapses to a list: option · date · price range */
   .dlv-t thead{display:none}
@@ -421,9 +445,14 @@ a.tbtn{display:inline-block}
   .methcards{grid-template-columns:1fr}
 }
 @media (max-width:600px){
-  /* X5: 44px tap height on text-buttons and the badge button; visual text size unchanged */
-  .tbtn,.badge-btn{min-height:44px;display:inline-flex;align-items:center}
+  /* X5 / Y7: 44px tap height on every text-button (incl. the anchor) and the badge button; text vertically centered */
+  .tbtn,a.tbtn,.badge-btn{min-height:44px;display:inline-flex;align-items:center}
   .subtotal .tbtn{margin-top:0}
+  /* Y6: nothing hides under the fixed bar; chat pill rides above it */
+  body{padding-bottom:calc(var(--barh,100px) + 8px)}
+  .site{padding-bottom:0}
+  .olark{bottom:calc(var(--barh,100px) + 12px)}
+  .toast{bottom:calc(var(--barh,100px) + 20px)}
 }
 @media (max-width:520px){
   .wrap{padding:0 14px}
@@ -506,8 +535,8 @@ a.tbtn{display:inline-block}
     <nav class="crumb" aria-label="breadcrumb"><a href="#">Home</a> &rsaquo; <a href="#">Bags</a> &rsaquo; <a href="#">Coolers</a> &rsaquo; 12 Can Lakeside Cooler Bag</nav>
 
     <div class="pdp-grid">
-      <!-- ================= LEFT COLUMN ================= -->
-      <div>
+      <!-- ================= LEFT COLUMN (Y1: `display:contents` on mobile so children take the production order) ================= -->
+      <div class="col-left">
         <div class="gallery">
           <div class="gal-main">
             <button class="gal-arrow l" aria-label="Previous Slide">&#8249;</button>
@@ -598,7 +627,7 @@ a.tbtn{display:inline-block}
                Same accordion idiom: h2 + 13px summary that carries the selected option's ship date.
                Body: production line for the selected option → ZIP estimator → options table → footnote. ======== -->
           <details class="acc" id="deliveryBlock" open>
-            <summary><h2>Delivery</h2><span class="sum" id="dlvSum"></span><span class="chev" aria-hidden="true"></span></summary>
+            <summary><h2>Delivery</h2><span class="sum" id="dlvSum"></span><span class="chev" aria-hidden="true"></span><button class="tbtn dlv-tease" id="dlvTease" type="button" hidden></button></summary>
             <div class="acc-body">
               <p class="dlv-prod" id="dlvProd"></p>
               <div class="zip">
@@ -638,14 +667,16 @@ a.tbtn{display:inline-block}
         </div>
       </div>
 
-      <!-- ================= RIGHT COLUMN — BUY BOX ================= -->
-      <div class="buybox">
-        <p class="bb-sku">SKU: SVR0000106</p>
-        <h1 class="bb-h1">12 Can Lakeside Cooler Bag</h1>
-        <!-- §4.5 (4) / X19: production's yellow filled "RUSH ORDER" image badge carried as a text badge; scrolls to and focuses the selector -->
-        <div class="bb-badges" id="badgeRow"><button class="badge-btn" id="rushBadge" type="button"><span class="badge-rush">24-Hour Rush available</span></button></div>
-        <p class="bb-tag">Ideal for travel, trade shows, and employee kits.</p>
-        <p class="bb-desc">This 12-can cooler bag is made from rugged 600 denier heather polyester. Your logo can be embroidered, screen printed, or heat transferred onto the front or back.</p>
+      <!-- ================= RIGHT COLUMN — BUY BOX (Y1: title block and setup block are separate mobile-order items) ================= -->
+      <div class="buybox col-right">
+        <div class="bb-title">
+          <p class="bb-sku">SKU: SVR0000106</p>
+          <h1 class="bb-h1">12 Can Lakeside Cooler Bag</h1>
+          <!-- §4.5 (4) / X19: production's yellow filled "RUSH ORDER" image badge carried as a text badge; scrolls to and focuses the selector -->
+          <div class="bb-badges" id="badgeRow"><button class="badge-btn" id="rushBadge" type="button"><span class="badge-rush">24-Hour Rush available</span></button></div>
+          <p class="bb-tag">Ideal for travel, trade shows, and employee kits.</p>
+          <p class="bb-desc">This 12-can cooler bag is made from rugged 600 denier heather polyester. Your logo can be embroidered, screen printed, or heat transferred onto the front or back.</p>
+        </div>
 
         <div class="bb-setup">
           <!-- ---- steps 1–2 (production, unchanged) ---- -->
@@ -668,7 +699,10 @@ a.tbtn{display:inline-block}
           <div id="stepsWizard" hidden>
             <div class="recap"><p><span class="n" aria-hidden="true">1&ndash;2</span><b id="recapColor">Navy Heather</b> &middot; <span id="recapQty">20</span> pieces</p><button class="tbtn" id="recapEdit" type="button">Edit color &amp; quantity</button></div>
 
-            <h2 class="stephd"><span class="n" aria-hidden="true">3</span>Decoration Method</h2>
+            <h2 class="stephd" id="step3Head"><span class="n" aria-hidden="true">3</span>Decoration Method</h2>
+            <!-- Y2 mirror at the top of step 3; Y4 visible status after Switch to Standard / Undo -->
+            <div class="notice step3" id="step3Notice" role="status" hidden><p id="step3NoticeText"></p><button class="nx" type="button" aria-label="Dismiss" data-dismiss>&times;</button></div>
+            <p class="status-line" id="step3Status" role="status" hidden></p>
             <!-- Standard: production radiogroup (three cards, descriptions verbatim) -->
             <div class="methcards" id="methCards" role="radiogroup" aria-label="Decoration method">
               <button type="button" role="radio" class="card" data-m="emb"><span class="nm">Embroidery</span><span class="pill">Full Color</span><span class="ds">Your design stitched in colored thread directly into the fabric, leaving a raised, textured mark with the soft sheen and dimensionality of real stitching.</span></button>
@@ -727,6 +761,8 @@ a.tbtn{display:inline-block}
                   <span class="dates" id="rushDates"></span>
                   <span class="help" id="rushHelp">No proof round &middot; default imprint only</span>
                 </label>
+                <!-- Y2: visible notice when Rush replaced a chosen method / location -->
+                <div class="notice" id="rushNotice" role="status" hidden><p id="rushNoticeText"></p><button class="nx" type="button" aria-label="Dismiss" data-dismiss>&times;</button></div>
                 <!-- the card expands into the timeline (§4.3 "What happens next"); X4: persistent countdown span -->
                 <div class="tl" id="rushTimeline" role="region" aria-label="What happens next" hidden>
                   <h3>What happens next</h3>
@@ -876,6 +912,7 @@ a.tbtn{display:inline-block}
     {"name": "2Day",      "lo": 2, "hi": 2, "price": "$35–80"},
     {"name": "Overnight", "lo": 1, "hi": 1, "price": "$60–140"}
   ],
+  "groundDaysByZipZone": {"0": 4, "1": 4, "2": 4, "3": 3, "4": 3, "5": 2, "6": 2, "7": 4, "8": 5, "9": 5},
   "clock": {"before": "2026-09-09T10:30:00", "near": "2026-09-09T11:15:00", "after": "2026-09-09T13:30:00"},
   "zip": "53202"
 }
@@ -890,7 +927,8 @@ var S;
 function initial(){
   return { product:'rush', clock:'before', artwork:null, tier:'standard', cfgOpen:false,
            method:'emb', loc:'Front Pocket', prevMethod:null, prevLoc:null,
-           color:0, qty:20, zip:D.zip, zipApplied:true, added:false, gal:0 };   /* X7: geo ZIP applied on load */
+           color:0, qty:20, zip:D.zip, zipApplied:true, added:false, gal:0,
+           notice:null, step3Status:'' };   /* X7: geo ZIP applied on load; Y2 notice = the replaced choice; Y4 status line */
 }
 S = initial();
 var openedAt = Date.now();   /* simulated clock advances in real time from the chosen chip */
@@ -930,6 +968,28 @@ function dt(d){ return '<span class="nw">'+lab(d)+'</span>'; }
 function dtb(d){ return '<b class="nw">'+lab(d)+'</b>'; }
 /* X1: the one cutoff phrase — before cutoff "by 12:00 PM CT today", after "by 12:00 PM CT Thu, Sep 10" */
 function cutoffPhrase(c){ return 'by <span class="nw">'+D.rush.cutoffLabel+'</span> '+(c.before ? 'today' : dt(c.startDay)); }
+/* Y5: no-artwork two-line conditional — condition bold, date regular; line 2 is the next-cutoff fallback */
+function condLines(c){
+  var nextCutoff = addBiz(c.startDay,1), nextShip = addBiz(nextCutoff, D.rush.days);
+  return ['<b>With artwork '+cutoffPhrase(c)+':</b> ships '+dt(c.rushShip),
+          '<b>By <span class="nw">'+D.rush.cutoffLabel+'</span> '+dt(nextCutoff)+':</b> ships '+dt(nextShip)];
+}
+function noArt(){ return isRush() && S.added && !S.artwork; }
+/* Y3: one date source — shipping rows for the current ZIP (Ground ≥ 2Day ≥ Overnight, always) */
+function shipRows(ship){
+  var rows=[];
+  for(var i=0;i<D.shipping.length;i++){
+    var o=D.shipping[i], lo=o.lo, hi=o.hi;
+    if(o.name==='Ground' && S.zipApplied){ lo = Math.max(2, D.groundDaysByZipZone[S.zip.charAt(0)]||3); hi=lo; }
+    rows.push({name:o.name, price:o.price, lo:addBiz(ship,lo), hi:addBiz(ship,hi), single:(S.zipApplied||lo===hi)});
+  }
+  return rows;
+}
+function step4Text(c){
+  var rows=shipRows(c.rushShip), ovn=rows[2], cheaper=rows.slice(0,2);
+  var pick = S.zipApplied ? cheaper.reduce(function(a,b){ return b.lo<a.lo ? b : a; }) : rows[1];   /* earliest cheaper option; tie → Ground (first) */
+  return 'Arrives as early as '+dtb(ovn.lo)+' with Overnight; '+pick.name+' lands '+dt(pick.lo)+(S.zipApplied ? ' for ZIP '+esc(S.zip) : '')+' &mdash; you choose shipping at checkout';
+}
 
 /* ---------- pricing ---------- */
 function unitFor(q){ var u=D.tiers[0][1]; for(var i=0;i<D.tiers.length;i++){ if(q>=D.tiers[i][0]) u=D.tiers[i][1]; } return u; }
@@ -985,12 +1045,12 @@ function renderSelector(c){
   /* X13: "Ships <date> · arrives as early as <date>", breaking into two lines at ≤400px */
   function datesLine(lead, ship, arr){ return lead+' '+dtb(ship)+'<span class="sep"> &middot; arrives as early as </span><span class="d2"><span class="d2lead">Arrives as early as </span>'+dt(arr)+'</span>'; }
   $('stdDates').innerHTML = datesLine('Ships as soon as', c.stdShip, c.stdOvn);
-  /* conditional wording once added to cart without artwork (§4.4 Add to cart); X1 cutoff phrase */
-  if(S.added && !S.artwork && r)
-    $('rushDates').innerHTML = 'Ships '+dtb(c.rushShip)+' once we have your artwork '+cutoffPhrase(c);
+  /* Y5: conditional two-line form once added to cart without artwork (§4.4 Add to cart) */
+  if(noArt()){ var cl=condLines(c); $('rushDates').innerHTML = '<span class="cond">'+cl[0]+'</span><span class="cond">'+cl[1]+'</span>'; }
   else
     $('rushDates').innerHTML = datesLine('Ships', c.rushShip, c.rushOvn);
   show($('rushHelp'), !r);
+  renderNotice();
   /* timeline (copy deck verbatim); X15: prose body, dates + deadline + ship date bold ink */
   var m = D.methods[D.rush.method];
   $('tl1').innerHTML = 'Check out with your artwork <b>'+cutoffPhrase(c)+'</b>';
@@ -998,8 +1058,9 @@ function renderSelector(c){
   var showCd = r && c.before && c.minsLeft!==null && c.minsLeft<60;
   $('tl1Cd').innerHTML = showCd ? '&middot; <b>'+cd(c.minsLeft)+'</b> left for this date' : '';
   $('tl2').innerHTML = 'Production starts the same business day &mdash; no proof to wait for or approve; we print your artwork as sent, using this item&rsquo;s default imprint ('+m.name+' &middot; '+D.rush.location+')';
-  $('tl3').innerHTML = 'Ships '+dtb(c.rushShip);
-  $('tl4').innerHTML = 'Arrives as early as '+dtb(c.rushOvn)+' with Overnight; '+dt(c.rush2)+' with 2Day &mdash; you choose shipping at checkout';
+  if(noArt()){ var cl3=condLines(c); $('tl3').innerHTML = cl3[0]+'<br>'+cl3[1]; }
+  else $('tl3').innerHTML = 'Ships '+dtb(c.rushShip);
+  $('tl4').innerHTML = step4Text(c);   /* Y3 */
   var art=$('tlArt');
   if(S.artwork){ art.textContent='Artwork received — your clock starts at checkout.'; art.classList.add('recvd'); }
   else { art.textContent='Artwork later? You can upload after checkout — your clock starts when we receive the file.'; art.classList.remove('recvd'); }
@@ -1009,14 +1070,18 @@ function renderSelector(c){
 function renderDelivery(c){
   var r = isRush();
   $('dlvSum').innerHTML = r ? 'ships '+dt(c.rushShip)+' ('+D.rush.tier+' Rush)' : 'ships as soon as '+dt(c.stdShip);
-  $('dlvProd').innerHTML = r
+  if(noArt()){ var cl=condLines(c); $('dlvProd').innerHTML = '<b>'+D.rush.tier+' Rush:</b> 1 business day, no proof, default imprint.<br>'+cl[0]+'<br>'+cl[1]; }
+  else $('dlvProd').innerHTML = r
     ? '<b>'+D.rush.tier+' Rush:</b> 1 business day, no proof, default imprint; checkout with artwork '+cutoffPhrase(c)+'.'
     : '<b>Standard:</b> Free digital proof within 24 hours; 4 business days production after your approval.';
+  /* Y1(c): Standard-state teaser in the header */
+  var tease = S.product==='rush' && !r;
+  show($('dlvTease'), tease);
+  if(tease) $('dlvTease').innerHTML = D.rush.tier+' Rush available &mdash; ships '+dt(c.rushShip);
   var ship = c.ship(r?'rush':'standard');
-  var h='';
-  for(var i=0;i<D.shipping.length;i++){
-    var o=D.shipping[i], lo=addBiz(ship,o.lo), hi=addBiz(ship,o.hi);
-    var date = (S.zipApplied || o.lo===o.hi) ? dt(lo) : dt(lo)+' – '+dt(hi);
+  var rows=shipRows(ship), h='';
+  for(var i=0;i<rows.length;i++){
+    var o=rows[i], date = o.single ? dt(o.lo) : dt(o.lo)+' – '+dt(o.hi);
     h+='<tr><td class="oname">'+o.name+'</td><td>'+date+'</td><td class="rng">'+o.price+'</td></tr>';
   }
   $('dlvTable').querySelector('tbody').innerHTML=h;
@@ -1056,9 +1121,26 @@ function renderConfig(c){
   var ctaLabel = S.cfgOpen ? 'Add to cart' : 'Customize Your Product';
   $('ctaPrimary').textContent=ctaLabel; $('mbGo').textContent=ctaLabel;
   /* mobile bar: compact rush line (§4.8) */
-  /* X20: one money format (+$39.00), ship date regular, subtotal amount bold */
-  $('mbLine').innerHTML = r ? 'Ships '+dt(c.rushShip)+' &middot; +'+usd(D.rush.fee) : 'Ships as soon as '+dt(c.stdShip);
+  /* X20: one money format (+$39.00), ship date regular, subtotal amount bold; Y1(b): Standard-state teaser */
+  $('mbLine').innerHTML = r ? 'Ships '+dt(c.rushShip)+' &middot; +'+usd(D.rush.fee)
+    : 'Ships as soon as '+dt(c.stdShip)+(S.product==='rush' ? ' &middot; <button class="tbtn" type="button" id="mbTease">Need it sooner? Rush ships '+dt(c.rushShip)+'</button>' : '');
   $('mbTot').textContent=usd(p.total);
+  /* Y2 mirror + Y4 status in step 3 */
+  show($('step3Status'), !!S.step3Status); $('step3Status').textContent=S.step3Status;
+  /* Y6: bar height → body padding + chat pill offset */
+  var bar=$('mobileBar'); document.documentElement.style.setProperty('--barh', (getComputedStyle(bar).display==='none' ? 0 : bar.offsetHeight)+'px');
+}
+/* Y2: the notice (card + step-3 mirror) */
+function renderNotice(){
+  var n=S.notice, on = !!n && isRush();
+  show($('rushNotice'), on); show($('step3Notice'), on);
+  if(!on) return;
+  var parts=[], undo=[];
+  if(n.method!==D.rush.method){ parts.push('Your '+D.methods[n.method].name+' choice'); undo.push(D.methods[n.method].name); }
+  if(n.loc!==D.rush.location){ parts.push((parts.length?'your ':'Your ')+n.loc+' location'); undo.push(n.loc); }
+  var what = parts.join(' and ')+(parts.length>1?' were':' was')+' replaced.';
+  var html = 'Rush uses this item&rsquo;s default imprint &mdash; '+D.methods[D.rush.method].name+' &middot; '+D.rush.location+'. '+what+' <button class="tbtn" type="button" data-undo>Undo</button> (Standard + '+undo.join(' &middot; ')+').';
+  $('rushNoticeText').innerHTML=html; $('step3NoticeText').innerHTML=html;
 }
 function renderChips(){
   var chips=document.querySelectorAll('.chip[data-set]');
@@ -1077,20 +1159,39 @@ setInterval(function(){ if(isRush()){ var c=calc(); if(c.before && c.minsLeft!==
    ============================================================ */
 function setTier(t, src){
   if(S.tier===t) return;
-  S.tier=t;
-  if(t==='rush'){ S.prevMethod=S.method; S.prevLoc=S.loc; S.method=D.rush.method; S.loc=D.rush.location; }
-  else if(S.prevMethod){ S.method=S.prevMethod; S.loc=S.prevLoc; S.prevMethod=null; }
+  S.tier=t; S.step3Status='';
+  if(t==='rush'){
+    S.prevMethod=S.method; S.prevLoc=S.loc;
+    /* Y2: remember what Rush replaces so the notice and Undo can restore it */
+    S.notice = (S.method!==D.rush.method || S.loc!==D.rush.location) ? {method:S.method, loc:S.loc} : null;
+    S.method=D.rush.method; S.loc=D.rush.location;
+  } else { if(S.prevMethod){ S.method=S.prevMethod; S.loc=S.prevLoc; S.prevMethod=null; } S.notice=null; }
   S.added=false;
   renderAll();
-  announce(t==='rush' ? D.rush.tier+' Rush selected. Rush fee '+usd(D.rush.fee)+' added.' : 'Standard selected. Rush fee removed.');
+  announce(t==='rush' ? D.rush.tier+' Rush selected. Rush fee '+usd(D.rush.fee)+' added.'+(S.notice?' Default imprint applied.':'') : 'Standard selected. Rush fee removed.');
+}
+/* Y4: after Switch to Standard / Undo — step 3 at the top, first method radio focused, visible status */
+function backToMethods(){
+  if(!S.cfgOpen) S.cfgOpen=true;
+  S.step3Status='Switched to Standard — choose a method.';
+  renderAll();
+  var head=$('step3Head'); window.scrollTo({top: head.getBoundingClientRect().top + window.pageYOffset - 8, behavior:'smooth'});
+  setTimeout(function(){ var first=$('methCards').querySelector('.card'); if(first) first.focus({preventScroll:true}); }, 350);
 }
 $('rStd').addEventListener('change', function(){ if(this.checked) setTier('standard','pdp'); });
 $('rRush').addEventListener('change', function(){ if(this.checked) setTier('rush','pdp'); });
-$('switchStd').addEventListener('click', function(){ setTier('standard','configurator'); setTimeout(function(){ $('rStd').focus(); },30); });
-$('rushBadge').addEventListener('click', function(){
-  var el=$('pdSel'); el.scrollIntoView({block:'center',behavior:'smooth'});
-  setTimeout(function(){ $('rRush').focus(); }, 350);
+$('switchStd').addEventListener('click', function(){ setTier('standard','configurator'); backToMethods(); });
+document.addEventListener('click', function(e){
+  var u=e.target.closest('[data-undo]'); if(u){ setTier('standard','undo'); backToMethods(); return; }
+  var x=e.target.closest('[data-dismiss]'); if(x){ S.notice=null; renderNotice(); return; }
+  var t=e.target.closest('#mbTease'); if(t){ goRush(); }
 });
+function goRush(){
+  var el=$('pdSel'); el.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(function(){ $('rRush').focus({preventScroll:true}); }, 350);
+}
+$('rushBadge').addEventListener('click', goRush);
+$('dlvTease').addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); goRush(); });
 $('dlvLink').addEventListener('click', function(e){ e.preventDefault(); $('deliveryBlock').open=true; $('deliveryBlock').scrollIntoView({block:'start',behavior:'smooth'}); setTimeout(function(){ $('zipIn').focus(); },400); });
 
 /* gallery / colors / tiers / qty */
@@ -1107,7 +1208,7 @@ function primaryAction(){
   S.added=true; renderAll(); openConf();
 }
 $('recapEdit').addEventListener('click', function(){ S.cfgOpen=false; renderAll(); });
-$('methCards').addEventListener('click', function(e){ var b=e.target.closest('.card'); if(!b) return; S.method=b.getAttribute('data-m'); S.loc=D.locations[0]; renderAll(); announce('Imprint location reset to '+S.loc+' for '+D.methods[S.method].name); });
+$('methCards').addEventListener('click', function(e){ var b=e.target.closest('.card'); if(!b) return; S.method=b.getAttribute('data-m'); S.loc=D.locations[0]; S.step3Status=''; renderAll(); announce('Imprint location reset to '+S.loc+' for '+D.methods[S.method].name); });
 $('methCards').addEventListener('keydown', function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft'&&e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
   var keys=Object.keys(D.methods), i=keys.indexOf(S.method), n=(e.key==='ArrowRight'||e.key==='ArrowDown')?(i+1)%keys.length:(i+keys.length-1)%keys.length;
@@ -1124,7 +1225,12 @@ function applyZip(){
   if(v.length===0){ S.zipApplied=false; renderAll(); announce('ZIP cleared. Arrival dates shown as ranges.'); return; }   /* X7: clearing returns the range table */
   if(v.length!==5){ $('zipStatus').textContent='Enter a 5-digit ZIP.'; return; }
   S.zip=v; S.zipApplied=true; renderAll(); announce('Arrival dates updated for ZIP '+v);
+  /* Y8: 600 ms wash highlight on the rows */
+  var trs=$('dlvTable').querySelectorAll('tbody tr');
+  for(var i=0;i<trs.length;i++) trs[i].classList.add('flash');
+  setTimeout(function(){ for(var i=0;i<trs.length;i++) trs[i].classList.remove('flash'); }, 600);
 }
+window.addEventListener('resize', function(){ var bar=$('mobileBar'); document.documentElement.style.setProperty('--barh', (getComputedStyle(bar).display==='none' ? 0 : bar.offsetHeight)+'px'); });
 $('zipGo').addEventListener('click', applyZip);
 $('zipIn').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); applyZip(); } });
 $('zipIn').addEventListener('change', applyZip);
@@ -1213,8 +1319,10 @@ function openConf(){
   $('confCfg').textContent = D.colors[S.color][0]+' · '+S.qty+' pieces · '+m.name+' on '+S.loc+' · '+m.colors;
   show($('confBand'), r && !S.artwork);   /* X8: band at the top when Rush has no artwork */
   if(r){
-    h+='<li><span class="k">Production</span>'+D.rush.tier+' Rush · ships '+dtb(c.rushShip)+(S.artwork ? '' : ' once we have your artwork '+cutoffPhrase(c))+'</li>';
-    h+='<li><span class="k">Delivery</span>Arrives as early as '+dt(c.rushOvn)+' — shipping chosen at checkout</li>';
+    /* Y5: no-artwork two-line conditional; Delivery row without a fixed date */
+    var cl=condLines(c);
+    h+='<li><span class="k">Production</span>'+(S.artwork ? D.rush.tier+' Rush · ships '+dtb(c.rushShip) : D.rush.tier+' Rush<br>'+cl[0]+'<br>'+cl[1])+'</li>';
+    h+='<li><span class="k">Delivery</span>'+(S.artwork ? 'Arrives as early as '+dt(c.rushOvn)+' — shipping chosen at checkout' : 'Arrives as early as the day after shipping — shipping chosen at checkout')+'</li>';
     h+='<li class="fee"><span>Rush fee (once per order)</span><span>'+usd(p.fee)+'</span></li>';
     h+='<li><span class="k">Proof</span>No proof — '+(S.artwork ? 'we print the artwork you uploaded ('+esc(S.artwork)+').' : 'we print your artwork as sent.')+'</li>';
     h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : 'Not uploaded yet')+'</li>';
