@@ -42,7 +42,7 @@
   --font:'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;overflow-anchor:none} /* R4: Chrome scroll anchoring dragged the page down when the Rush card expanded on mobile (verify R3 P1) */
 body{margin:0;font-family:var(--font);font-size:16px;line-height:1.5;color:var(--body);background:var(--page)}
 h1,h2,h3,h4,h5,p,ul,ol,figure,table,dl,dd{margin:0}
 ul{padding:0;list-style:none}
@@ -425,7 +425,8 @@ a.tbtn{display:inline-block}
     border-top:1px solid var(--rule);box-shadow:0 -4px 16px rgba(0,0,0,.10);padding:8px 14px 10px;gap:6px}
   /* X20: ship date regular, subtotal amount bold; Y1(b): Standard-state teaser text-button */
   .mobile-bar .line{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums;flex-wrap:wrap}
-  .mobile-bar .line .tbtn{font-size:14px;min-height:0;display:inline}
+  .mobile-bar .line .tbtn{font-size:14px;min-height:0;display:inline;position:relative}
+  .mobile-bar .line .tbtn::after{content:'';position:absolute;left:0;right:0;top:-12px;bottom:-12px} /* R4 (Y7): 44px tap area without growing the bar */
   .mobile-bar .line .tot{color:var(--body)}
   .mobile-bar .line .tot b{color:var(--ink);font-weight:700}
   /* X2: 19px/700 white on orange = large-text exemption */
@@ -1126,7 +1127,7 @@ function renderConfig(c){
     : 'Ships as soon as '+dt(c.stdShip)+(S.product==='rush' ? ' &middot; <button class="tbtn" type="button" id="mbTease">Need it sooner? Rush ships '+dt(c.rushShip)+'</button>' : '');
   $('mbTot').textContent=usd(p.total);
   /* Y2 mirror + Y4 status in step 3 */
-  show($('step3Status'), !!S.step3Status); $('step3Status').textContent=S.step3Status;
+  show($('step3Status'), !!S.step3Status); $('step3Status').textContent=S.step3Status ? '✓ '+S.step3Status : ''; /* R4 (Y4): green tick idiom */
   /* Y6: bar height → body padding + chat pill offset */
   var bar=$('mobileBar'); document.documentElement.style.setProperty('--barh', (getComputedStyle(bar).display==='none' ? 0 : bar.offsetHeight)+'px');
 }
@@ -1176,7 +1177,7 @@ function backToMethods(){
   S.step3Status='Switched to Standard — choose a method.';
   renderAll();
   var head=$('step3Head'); window.scrollTo({top: head.getBoundingClientRect().top + window.pageYOffset - 8, behavior:'smooth'});
-  setTimeout(function(){ var first=$('methCards').querySelector('.card'); if(first) first.focus({preventScroll:true}); }, 350);
+  setTimeout(function(){ var sel=$('methCards').querySelector('.card[data-m="'+S.method+'"]')||$('methCards').querySelector('.card'); if(sel) sel.focus({preventScroll:true}); }, 350); /* R4: focus the restored method (Undo → Silkscreen), else the first */
 }
 $('rStd').addEventListener('change', function(){ if(this.checked) setTier('standard','pdp'); });
 $('rRush').addEventListener('change', function(){ if(this.checked) setTier('rush','pdp'); });
