@@ -1,35 +1,35 @@
 <!-- Design library: design/library/promotionpros-pdp.md -->
 <!--
-  PromotionPros — RUSH flow prototype on the current two-step PDP
+  PromotionPros — RUSH flow v3.2 prototype on the current two-step PDP (polished, production-faithful)
   Product: 12 Can Lakeside Cooler Bag (SVR0000106)
-  Spec: docs/2026-09-09-rush-flow-ux-draft.md §4 (4.3 selector + timeline, 4.4 configurator
-        under Rush, 4.5 Delivery block, 4.7 edge states, 4.8 mobile, 4.9 copy deck verbatim)
-  Brief: design/prototypes/2026-09-09-rush-flow/brief.md
-  Style anchors: production DOM saved 2026-09-09 (Tailwind React PDP) > design library >
-        fork base design/prototypes/2026-09-09-quote-flow-v2/index.html (page chrome + tokens)
+  Spec: docs/2026-09-10-rush-flow-redesign-v3.md (v3.2, approved 2026-09-10) — §3 control, §3.4 "How 24-Hour Rush works",
+        §4 anatomy, §5 visible state, §5a hierarchy map, §6 behavior, §7 edge states, §9 copy
+  Copy: design/prototypes/2026-09-10-rush-redesign-wireframe/copy-deck-v3.2.md — "Recommended" column verbatim
+  Behavior contract: design/prototypes/2026-09-10-rush-redesign-wireframe/approved-v3.2/index.html
+  Visual base: design/prototypes/2026-09-09-rush-flow/index.html (R4) — page chrome, tokens, buy box, configurator,
+        dialogs, Delivery block, mobile bar. Its "Production & delivery" selector, in-card timeline and mode band are removed.
+  Brief: design/prototypes/2026-09-10-rush-flow-v3/brief.md
 
   What is new on this page (everything else reproduces production):
-    1. Buy box: "Production & delivery" selector replaces the "Rush service" checkbox row (§4.3)
-    2. Rush card expands into the "What happens next" timeline (§4.3)
-    3. "Rush fee (once per order)" line in the subtotal block and the price breakdown (§4.3, 4.4)
-    4. Configurator under Rush: locked method card, plain-text location, primary upload (§4.4)
-    5. Left column: "Delivery" block with ZIP estimator replaces "Production & Shipping" (§4.5)
-    6. Text badge "24-Hour Rush available" replaces the /rush image badge (§4.5)
-    7. "Added to cart" confirmation panel (brief; Baymard B-PDP037) — §4.6 cart is out of scope
+    1. Compact two-segment toggle in the tag slot under the H1 replaces the "RUSH ORDER" badge (spec §3)
+    2. Collapsible "How 24-Hour Rush works" timeline under the toggle, Rush only (spec §3.4)
+    3. Rush one-pager buy box: steps 1–4 pre-filled, amber notice, method card, Imprint Details rows,
+       secondary upload CTA + modal, fee line, "Add Rush order to cart" (spec §4.2)
+    4. Left column "Delivery" block whose header follows the mode (spec §4.4)
+    5. "Added to cart" confirmation panel with the Rush rows (spec §9 rows 36–37)
 -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PromotionPros — 12 Can Lakeside Cooler Bag — RUSH flow prototype</title>
+<title>PromotionPros — 12 Can Lakeside Cooler Bag — RUSH flow v3.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   TOKENS — design/library/promotionpros-pdp.md (Tailwind semantic tokens
-   re-expressed as custom properties; hex values from computed styles)
+   TOKENS — design/library/promotionpros-pdp.md + spec §5 (rush-yellow, rush-frame-wash, amber-wash, amber-rule)
    ============================================================ */
 :root{
   --orange:#FE5000; --orange-hover:#E04700; --wash:#FFF6F2;
@@ -37,12 +37,14 @@
   --rule:#EEEEEE; --rule-strong:#D4D4D4; --input-border:#CDCDCD;
   --surface:#F7F7F8; --gray-bg:#F5F5F5;
   --in-stock:#12653A;
-  --amber-ink:#7A4A00; --amber-bg:#FFF6E5; --amber-rule:#E8C88A;
+  --rush-yellow:#FFD400; --rush-wash:#FFFDF2; --rush-rule:#F0E6A8;
+  --amber-bg:#FFF6E5; --amber-rule:#E8C88A;
   --page:#F2F3F5;
   --font:'Lato',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;overflow-anchor:none} /* R4: Chrome scroll anchoring dragged the page down when the Rush card expanded on mobile (verify R3 P1) */
+html{-webkit-text-size-adjust:100%;overflow-anchor:none} /* lessons: Chrome scroll anchoring must not move the page when the buy box re-renders */
+*{overflow-anchor:none} /* overflow-anchor is not inherited: with html-only, unhiding the 585px "How it works" block at 375 still shifted scrollY by its height (measured +606) */
 body{margin:0;font-family:var(--font);font-size:16px;line-height:1.5;color:var(--body);background:var(--page)}
 h1,h2,h3,h4,h5,p,ul,ol,figure,table,dl,dd{margin:0}
 ul{padding:0;list-style:none}
@@ -52,10 +54,11 @@ img{max-width:100%}
 [hidden]{display:none !important}
 :focus-visible{outline:2px solid var(--navy);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.nw{white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important;animation-duration:.01ms !important}}
 
 /* ============================================================
-   PROTOTYPE CHROME — dev chips (brief "Dev controls"); same idiom as quote-flow-v2
+   PROTOTYPE CHROME — dev chips (brief): Product / Clock / Artwork / Reset
    ============================================================ */
 .proto-bar{position:sticky;top:0;z-index:200;background:#14181D;color:#B9C0C9;font-size:13px;
   display:flex;align-items:center;gap:6px;padding:8px 16px;flex-wrap:wrap}
@@ -74,7 +77,7 @@ img{max-width:100%}
 .toast.on{display:block}
 
 /* ============================================================
-   SITE CHROME — reproduced from the 2026-09-09 capture (fork base)
+   SITE CHROME — reproduced from the 2026-09-09 capture (R4 base)
    ============================================================ */
 .site{background:#fff}
 .wrap{max-width:1280px;margin:0 auto;padding:0 24px}
@@ -151,40 +154,27 @@ details.acc[open]>summary .chev{transform:rotate(-135deg) translateY(-2px)}
 .skuline{font-size:16px;color:var(--body);padding:16px 16px 24px;border-top:1px solid var(--rule)}
 .skuline .st{color:var(--in-stock);font-weight:700;margin-left:12px}
 
-/* ---- NEW §4.5: Delivery block body ---- */
+/* ---- Delivery block body (v2.3 §4.5, kept; header follows the mode — spec §4.4) ---- */
 .dlv-prod{margin-bottom:14px}
 .dlv-prod b{color:var(--ink)}
-/* X21: ZIP shares the quantity-input component (14/700 label, 18/700 ink value); grey border = "secondary input" variant */
 .zip{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px}
 .zip .lab{display:block;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
 .zip input{display:block;width:140px;border:1px solid var(--rule-strong);border-radius:4px;padding:8px 12px;font:inherit;font-size:18px;font-weight:700;color:var(--ink);background:#fff;line-height:1.4}
 .zip-status{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:20px}
-/* X10 / X17: sentence-case headers; cells styled as cells; price column right-aligned, tabular figures */
 .dlv-t{width:100%;border-collapse:collapse;font-size:16px}
 .dlv-t th{font-size:13px;font-weight:700;color:var(--ink);text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule)}
 .dlv-t th.rng{text-align:right}
-.dlv-t td{padding:10px 12px;border-bottom:1px solid var(--rule);color:var(--ink);vertical-align:top}
+.dlv-t td{padding:10px 12px;border-bottom:1px solid var(--rule);color:var(--ink);vertical-align:top;transition:background-color .3s}
 .dlv-t td.oname{font-weight:700}
 .dlv-t td.rng{color:var(--body);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
-/* Y8: 600 ms wash highlight after a ZIP update */
-.dlv-t td{transition:background-color .3s}
 .dlv-t tr.flash td{background:var(--wash)}
-/* Y1(c): Delivery header teaser line in the Standard state */
-.dlv-tease{display:block;width:100%;font-size:13px;color:var(--muted);margin-top:2px}
 .dlv-fn{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5}
-.nw{white-space:nowrap}
 
 /* ============================================================
    BUY BOX — production idiom (Tailwind classes translated 1:1)
    ============================================================ */
-.buybox{position:static}
 .bb-sku{font-size:13px;color:var(--muted)}
 .bb-h1{font-size:24px;line-height:32px;font-weight:700;color:var(--ink);margin-top:8px}
-.bb-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-/* X19 §4.5: the production yellow filled "RUSH ORDER" badge (image, 20px tall) carried as a text badge; the button is the hit area */
-.badge-btn{background:none;border:0;padding:0;cursor:pointer;display:inline-flex;align-items:center}
-.badge-rush{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:3px;background:#FFD400;color:var(--navy);font-size:13px;font-weight:700;line-height:20px;white-space:nowrap}
-.badge-btn:hover .badge-rush{text-decoration:underline}
 .bb-tag{margin-top:12px;border-left:3px solid var(--orange);padding-left:12px;color:var(--ink);line-height:1.5}
 .bb-desc{margin-top:12px;color:var(--body)}
 .bb-setup{margin-top:24px}
@@ -220,7 +210,7 @@ details.acc[open]>summary .chev{transform:rotate(-135deg) translateY(-2px)}
 .recap .n{font-size:18px;line-height:1;font-weight:700;color:var(--orange);margin-right:8px}
 .recap b{color:var(--ink)}
 
-/* text-buttons — ONE style for every text-button on the page (consistency matrix row 2) */
+/* text-buttons — ONE style for every text-button on the page (spec §5a rank 11) */
 .tbtn{background:none;border:0;padding:0;font-size:13px;font-weight:700;color:var(--navy);text-decoration:underline;text-underline-offset:2px;line-height:1.5;text-align:left}
 .tbtn:hover{text-decoration:none}
 a.tbtn{display:inline-block}
@@ -232,12 +222,8 @@ a.tbtn{display:inline-block}
 .card.on,.card.on:hover{border-color:var(--orange);background:var(--wash)}
 .card .nm{color:var(--ink)}
 .card.on .nm{font-weight:700}
-.card .pill{display:inline-block;border:1px solid var(--rule-strong);border-radius:999px;padding:2px 8px;font-size:13px;color:var(--ink);white-space:nowrap;margin-left:6px;line-height:1.4}
-.card .pill.muted{color:var(--muted)}
+.pill{display:inline-block;border:1px solid var(--rule-strong);border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;margin-left:6px;line-height:1.4;background:#fff;vertical-align:middle}
 .card .ds{display:block;margin-top:3px;font-size:13px;line-height:1.45;color:var(--muted)}
-/* NEW §4.4: locked method card — same card idiom, selected state, not a control */
-.card.locked{cursor:default}
-.card.locked:hover{border-color:var(--orange);background:var(--wash)}
 .disc{border-radius:6px;background:rgba(238,238,238,.4);margin-bottom:8px}
 .disc>summary{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;list-style:none}
 .disc>summary::-webkit-details-marker{display:none}
@@ -261,65 +247,70 @@ a.tbtn{display:inline-block}
 .imp .cost{white-space:nowrap;color:var(--muted)}
 .imp .cost b{color:var(--ink)}
 .upl-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-/* X2: ONE secondary action style — navy 1px outline, 44px, 15/700 navy, 4px. Used by the Rush upload trigger,
-   dialog Done / Choose a file / Cancel / Close, Update dates, Continue shopping, View cart, Upload artwork (band). */
-.btn-2{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--navy);border-radius:4px;background:#fff;color:var(--navy);font-size:15px;font-weight:700;padding:0 16px;text-align:left;line-height:1.3}
+/* ONE secondary action style (spec §5a rank 7): 48px, 1px navy outline, 16/700 navy, 4px. Used by the Rush upload CTA,
+   dialog Choose a file / Cancel / Done / Close, Update dates, Continue shopping, View cart, Upload artwork (panel band). */
+.btn-2{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border:1px solid var(--navy);border-radius:4px;background:#fff;color:var(--navy);font-size:16px;font-weight:700;padding:0 16px;text-align:center;line-height:1.3}
 .btn-2:hover{background:var(--gray-bg)}
+.btn-2 svg{flex:none}
 .recv{font-size:13px;color:var(--in-stock);font-weight:700;margin-top:6px;line-height:1.5}
 .recv .fn{color:var(--ink)}
 .addloc{margin-bottom:16px}
 
-/* ---- NEW §4.3: Production & delivery selector ---- */
-.pd{margin-bottom:16px}
-/* X22: section heading, not a field label */
-.pd-h{font-size:16px;font-weight:700;color:var(--ink);margin:12px 0 8px}
-.pd fieldset{border:0;padding:0;margin:0;min-width:0}
-.pd fieldset legend{padding:0}
-/* X12: .opt is a div; the label (radio + name + fee + dates + helper) and the timeline are siblings inside it */
-.opt{display:block;border:1px solid var(--rule);border-radius:4px;background:#fff;padding:12px;transition:border-color .15s,background .15s}
-.opt+.opt{margin-top:8px}
-.opt:hover{border-color:var(--rule-strong);background:var(--surface)}
-.opt.on,.opt.on:hover{border-color:var(--orange);background:var(--wash)}
-.opt label{display:block;cursor:pointer}
-.opt .top{display:flex;align-items:center;gap:8px}
-.opt input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--orange)}
-.opt .tier-nm{font-size:16px;font-weight:700;color:var(--ink)}
-.opt .fee{margin-left:auto;font-size:14px;color:var(--body);white-space:nowrap;font-variant-numeric:tabular-nums}
-.opt .dates{display:block;margin:4px 0 0 24px;font-size:16px;color:var(--ink);line-height:1.5}
-.opt .dates b{font-weight:700}
-.opt .dates .d2lead{display:none}
-.opt .help{display:block;margin:2px 0 0 24px;font-size:13px;color:var(--muted);line-height:1.5}
-.opt .dates .cond{display:block}
-.opt .dates .cond b{font-weight:700}
-/* Y2: visible amber notice when Rush replaces a chosen method / location (card + mirrored at the top of step 3) */
-.notice{display:flex;align-items:flex-start;gap:10px;background:var(--amber-bg);border:1px solid var(--amber-rule);border-radius:4px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--amber-ink);margin:8px 0 0 24px}
-.notice p{flex:1;margin:0}
-.notice .tbtn{color:var(--amber-ink);font-size:14px}
-.notice .nx{background:none;border:0;padding:0;font-size:20px;line-height:1;color:var(--amber-ink);flex:none;min-height:0;cursor:pointer}
-.notice.step3{margin:0 0 10px}
-/* Y4: visible status line above the method radios */
-.status-line{font-size:13px;color:var(--in-stock);font-weight:700;line-height:1.5;margin-bottom:8px}
-/* X14–X16: compact timeline — 14px body prose, plain "1." numerals, 8px between steps */
-.tl{margin:8px 0 0;border-top:1px solid var(--rule);padding-top:8px}
-.tl h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.45}
-.tl ol{margin:0;padding:0;list-style:none;counter-reset:st}
-.tl li{position:relative;padding-left:20px;font-size:14px;line-height:1.45;color:var(--body);margin-bottom:8px;counter-increment:st}
-.tl li:last-child{margin-bottom:0}
-.tl li::before{content:counter(st) ".";position:absolute;left:0;top:0;font-size:13px;line-height:20px;font-weight:700;color:var(--muted)}
-.tl li b{font-weight:700;color:var(--ink)}
-.tl .cd{font-size:13px;font-weight:400;color:var(--muted)}
-.tl .cd b{color:var(--muted)}
-.tl .ln{font-size:13px;color:var(--muted);line-height:1.45;margin-top:6px}
-.tl .ln+.ln{margin-top:2px}
-.tl .ln.recvd{color:var(--in-stock);font-weight:700}
-/* NEW §4.3 non-rush products: one line, no cards */
-.pd-line{font-size:16px;color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;line-height:1.5}
-.pd-link{margin:8px 0 16px}
+/* ---- NEW spec §3.3: compact production-speed toggle (Custom Ink footprint: one 40px row, inline width) ---- */
+.mode{display:inline-flex;max-width:100%;margin-top:12px;border:1px solid var(--rule-strong);border-radius:4px;overflow:hidden;background:#fff;vertical-align:top}
+.seg{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:40px;padding:0 12px;border:0;background:#fff;color:var(--body);text-align:left;min-width:0;white-space:nowrap;transition:background .15s}
+.seg+.seg{border-left:1px solid var(--rule-strong)}
+.seg:hover{background:var(--surface)}
+.seg .t{font-size:14px;line-height:16px;font-weight:700;color:var(--ink)}
+.seg .s{font-size:13px;line-height:15px;color:var(--body);font-variant-numeric:tabular-nums}
+.seg .ico{color:var(--muted);margin-right:3px}
+.seg .ck{display:none;margin-left:4px}
+.seg.std[aria-checked="true"]{background:var(--surface);box-shadow:inset 0 -2px 0 var(--ink)}
+.seg.rush[aria-checked="true"],.seg.rush[aria-checked="true"]:hover{background:var(--rush-yellow);color:var(--ink)}
+.seg.rush[aria-checked="true"] .s,.seg.rush[aria-checked="true"] .ico{color:var(--ink)}
+.seg.rush[aria-checked="true"] .ck{display:inline}
+.seg:focus-visible{outline:2px solid var(--navy);outline-offset:-3px}
+
+/* ---- NEW spec §3.4: "How 24-Hour Rush works" collapsible — yellow 1px frame, pale wash; title 16/700 + summary 16/400 ---- */
+details.how{border:1px solid var(--rush-yellow);background:var(--rush-wash);border-radius:4px;margin-bottom:20px}
+details.how>summary{display:block;padding:10px 12px;cursor:pointer;list-style:none}
+details.how>summary::-webkit-details-marker{display:none}
+details.how>summary:hover .st{text-decoration:underline;text-underline-offset:2px}
+details.how .st{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:16px;line-height:1.4;font-weight:700;color:var(--ink)}
+details.how .st .chev{width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);flex:none;margin-right:4px}
+details.how[open] .st .chev{transform:rotate(-135deg) translateY(2px)}
+details.how .sm{display:block;font-size:16px;line-height:1.4;font-weight:400;color:var(--body);margin-top:2px}
+.tl{margin:0;padding:0 12px 10px;list-style:none;font-size:16px;line-height:1.4}
+.tl li{display:grid;grid-template-columns:20px 150px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--rush-rule)}
+.tl li .n{color:var(--muted);font-size:13px;font-weight:700;line-height:22px}
+.tl li .d{font-weight:700;color:var(--ink)}
+.tl li .w{color:var(--body)}
+.tl li .w small,.tl li .d small{display:block;font-size:13px;line-height:1.4;font-weight:400;color:var(--body);font-style:italic;margin-top:2px}
+.tl li .cd{font-weight:400;color:var(--body);white-space:nowrap}
+.tl li.rule{grid-template-columns:1fr;color:var(--body)}
+.tl li.rule b{font-weight:400;color:var(--ink)}
+
+/* ---- NEW spec §6: visible status line on return to Standard (role=status, never sr-only) ---- */
+.status-line{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.5;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:8px 12px;margin-bottom:20px}
+.status-line .ck{color:var(--in-stock);font-weight:700}
+
+/* ---- NEW spec §4.2: Rush one-pager — amber notice (rank 6), method card (rank 3), Imprint Details rows (rank 8), upload CTA (rank 7) ---- */
+.amber{background:var(--amber-bg);border:1px solid var(--amber-rule);border-radius:4px;padding:10px 12px;font-size:14px;line-height:1.5;color:var(--ink);margin-bottom:12px}
+.mcard{background:var(--surface);border-radius:6px;padding:12px 16px;margin-bottom:8px}
+.mcard .nm{font-size:16px;font-weight:700;color:var(--ink)}
+.mcard p{margin:6px 0 8px;font-size:16px;line-height:1.4;color:var(--body)}
+.rows{font-size:16px;line-height:1.4;margin-bottom:16px}
+.rows>div{padding:5px 0;color:var(--body)}
+.rows b{font-weight:400;color:var(--ink)}
+.upl{width:100%}
+.upl .ok{color:var(--in-stock)}
+.side{font-size:14px;line-height:1.45;color:var(--body);margin-top:8px}
+.chg-row{display:flex;justify-content:flex-end;margin-top:4px}
+.fee{display:flex;justify-content:space-between;gap:12px;font-size:16px;line-height:1.4;color:var(--ink);margin:20px 0 12px;font-variant-numeric:tabular-nums}
 
 /* subtotal — production: border-l-[3px] border-secondary py-1 pl-3 */
 .subtotal{border-left:3px solid var(--orange);padding:4px 0 4px 12px;margin-bottom:16px}
 .subtotal .r{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.subtotal .r.fee{font-size:14px;color:var(--body);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .subtotal .k{color:var(--muted)}
 .subtotal .amt{font-size:30px;line-height:1.4;font-weight:700;color:var(--ink);text-align:right}
 .subtotal .sm{font-size:14px;color:var(--muted);margin-top:2px}
@@ -352,8 +343,7 @@ a.tbtn{display:inline-block}
 .filerow b{color:var(--ink)}
 .filerow .meta{font-size:13px;color:var(--muted)}
 .band{border-radius:4px;padding:10px 12px;font-size:14px;line-height:1.5;margin-top:12px}
-.band.amber{background:var(--amber-bg);border:1px solid var(--amber-rule);color:var(--amber-ink)}
-.band.amber .tbtn{color:var(--amber-ink)}
+.band.amber{background:var(--amber-bg);border:1px solid var(--amber-rule);color:var(--ink);margin-bottom:0}
 .instr{margin-top:14px}
 .instr label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
 .instr textarea{width:100%;min-height:72px;border:1px solid var(--rule-strong);border-radius:4px;padding:10px 12px;font:inherit;font-size:16px;color:var(--ink);resize:vertical}
@@ -364,9 +354,8 @@ a.tbtn{display:inline-block}
 /* confirmation panel */
 .conf-ok{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:700;font-size:18px}
 .conf-ok .ck{color:var(--in-stock);font-weight:700}
-/* X8: no-artwork band at the top of the panel */
-.conf-band{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--amber-bg);border:1px solid var(--amber-rule);border-radius:4px;padding:12px;color:var(--amber-ink);font-size:16px;line-height:1.5}
-.conf-band p{flex:1 1 260px;margin:0}
+.conf-band{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--amber-bg);border:1px solid var(--amber-rule);border-radius:4px;padding:12px;color:var(--ink);font-size:16px;line-height:1.5}
+.conf-band p{flex:1 1 240px;margin:0}
 .conf-prod{display:flex;gap:14px;align-items:flex-start;margin-top:14px;padding:12px;border:1px solid var(--rule);border-radius:4px}
 .conf-prod img{width:64px;height:64px;object-fit:contain;background:var(--surface);border-radius:4px;flex:none}
 .conf-prod .nm{font-weight:700;color:var(--ink)}
@@ -375,7 +364,8 @@ a.tbtn{display:inline-block}
 .conf-lines li{padding:6px 0;border-bottom:1px solid var(--rule);color:var(--ink);line-height:1.5}
 .conf-lines li:last-child{border-bottom:0}
 .conf-lines li .k{color:var(--muted);font-size:13px;display:block}
-.conf-lines li.fee{display:flex;justify-content:space-between;gap:12px}
+.conf-lines li .cond{display:block}
+.conf-lines li.fee{display:flex;justify-content:space-between;gap:12px;margin:0}
 
 /* ---- rest of page (reproduction) ---- */
 .related{margin-top:32px;border-top:1px solid var(--rule);padding-top:16px}
@@ -402,10 +392,10 @@ a.tbtn{display:inline-block}
 .mobile-bar{display:none}
 
 /* ============================================================
-   RESPONSIVE — §4.8 mobile
+   RESPONSIVE — spec §4.3 mobile 375
    ============================================================ */
 @media (max-width:960px){
-  /* Y1: mobile source order = gallery → H1 + badge → buy box → Key Facts → accordions (production's wrapper→contents technique) */
+  /* lessons: mobile source order = gallery → H1 + control → buy box → Key Facts → accordions (production's wrapper→contents technique) */
   .pdp-grid{display:flex;flex-direction:column;gap:0}
   .col-left,.col-right{display:contents}
   .gallery{order:1}
@@ -413,30 +403,25 @@ a.tbtn{display:inline-block}
   .bb-setup{order:3}
   .keyfacts{order:4;margin-top:26px}
   .accs{order:5}
-  .buybox{position:static}
   .gal-main img{height:260px}
   .site-foot .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
   .rel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .back{padding:0;align-items:stretch}
   .dlg{width:100%;border-radius:0;min-height:100%;display:flex;flex-direction:column}
   .dlg-b{flex:1;overflow:auto}
-  /* sticky CTA bar — keeps Add to cart / Customize; compact rush line above it (§4.8) */
-  .mobile-bar{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;
-    border-top:1px solid var(--rule);box-shadow:0 -4px 16px rgba(0,0,0,.10);padding:8px 14px 10px;gap:6px}
-  /* X20: ship date regular, subtotal amount bold; Y1(b): Standard-state teaser text-button */
-  .mobile-bar .line{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums;flex-wrap:wrap}
-  .mobile-bar .line .tbtn{font-size:14px;min-height:0;display:inline;position:relative}
-  .mobile-bar .line .tbtn::after{content:'';position:absolute;left:0;right:0;top:-12px;bottom:-12px} /* R4 (Y7): 44px tap area without growing the bar */
-  .mobile-bar .line .tot{color:var(--body)}
-  .mobile-bar .line .tot b{color:var(--ink);font-weight:700}
-  /* X2: 19px/700 white on orange = large-text exemption */
-  .mobile-bar .go{width:100%;min-height:48px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:19px;font-weight:700}
-  .site{padding-bottom:0}
+  /* spec §5 sticky bar: [yellow strip under Rush] + subtotal + CTA */
+  .mobile-bar{display:block;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;
+    border-top:1px solid var(--rule);box-shadow:0 -4px 16px rgba(0,0,0,.10)}
+  .mobile-bar .strip{background:var(--rush-yellow);color:var(--ink);font-size:13px;line-height:18px;font-weight:700;padding:5px 14px;height:28px}
+  .mobile-bar .row{display:flex;align-items:center;gap:12px;padding:8px 14px 10px}
+  .mobile-bar .tot{flex:none;font-size:14px;color:var(--body);line-height:1.3;font-variant-numeric:tabular-nums}
+  .mobile-bar .tot b{color:var(--ink);font-weight:700;font-size:16px}
+  .mobile-bar .tot small{display:block;font-size:13px;color:var(--body)}
+  .mobile-bar .go{flex:1;min-height:48px;border:0;border-radius:4px;background:var(--orange);color:#fff;font-size:17px;font-weight:700;padding:0 10px;white-space:nowrap}
   body{padding-bottom:calc(var(--barh,100px) + 8px)}
   .olark{bottom:calc(var(--barh,100px) + 12px);padding:10px 16px;font-size:13px}
   .toast{bottom:calc(var(--barh,100px) + 20px)}
   .state-chips .lbl{min-width:0;width:100%}
-  /* §4.8 Delivery table collapses to a list: option · date · price range */
   .dlv-t thead{display:none}
   .dlv-t,.dlv-t tbody,.dlv-t tr,.dlv-t td{display:block;width:100%}
   .dlv-t tr{border-bottom:1px solid var(--rule);padding:8px 0}
@@ -446,31 +431,27 @@ a.tbtn{display:inline-block}
   .methcards{grid-template-columns:1fr}
 }
 @media (max-width:600px){
-  /* X5 / Y7: 44px tap height on every text-button (incl. the anchor) and the badge button; text vertically centered */
-  .tbtn,a.tbtn,.badge-btn{min-height:44px;display:inline-flex;align-items:center}
+  /* 44px tap height on every text-button (incl. anchors); text vertically centered */
+  .tbtn,a.tbtn{min-height:44px;display:inline-flex;align-items:center}
   .subtotal .tbtn{margin-top:0}
-  /* Y6: nothing hides under the fixed bar; chat pill rides above it */
-  body{padding-bottom:calc(var(--barh,100px) + 8px)}
-  .site{padding-bottom:0}
-  .olark{bottom:calc(var(--barh,100px) + 12px)}
-  .toast{bottom:calc(var(--barh,100px) + 20px)}
 }
 @media (max-width:520px){
   .wrap{padding:0 14px}
   .catnav .rush{margin-left:0}
   .qtyrow{flex-direction:column}
-  .opt .fee{font-size:14px}
   .dlg-h,.dlg-b,.dlg-f{padding-left:16px;padding-right:16px}
   .zip input{width:100%}
   .zip>div{flex:1 1 100%}
   .zip .btn-2{width:100%}
 }
 @media (max-width:400px){
-  /* X13: card dates break deliberately into two lines */
-  .opt .dates .sep{display:none}
-  .opt .dates .d2lead{display:inline}
-  .opt .dates .d2{display:block}
-  /* X22: tier table fits 375 — row labels may wrap, 8px cells, nothing clips */
+  /* spec §3.3: 300×42 footprint at 375 — tighter padding, 12px sub-line */
+  .seg{padding:0 8px}
+  .seg .s{font-size:12px;line-height:14px}
+  /* spec §3.4: date column 108px at 375 */
+  .tl li{grid-template-columns:18px 108px 1fr}
+  .tl li.rule{grid-template-columns:1fr}
+  /* tier table fits 375 — row labels may wrap, 8px cells, nothing clips */
   .tier th{padding-right:8px;font-size:13px;white-space:normal;line-height:1.3;width:86px}
   .tier td button{padding:6px 8px}
 }
@@ -482,8 +463,8 @@ a.tbtn{display:inline-block}
      PROTOTYPE CHROME — dev chips only set state; every reviewer path uses the real controls
      ============================================================ -->
 <div class="proto-bar">
-  <b>RUSH flow — two-step PDP</b>
-  <span class="proto-note">promotionpros.com &middot; 12 Can Lakeside Cooler Bag &middot; 2026-09-09 &middot; spec v2.1 &sect;4</span>
+  <b>RUSH flow v3.2 — two-step PDP</b>
+  <span class="proto-note">promotionpros.com &middot; 12 Can Lakeside Cooler Bag &middot; 2026-09-10 &middot; spec v3.2</span>
 </div>
 <div class="wrap chipdeck" id="chipdeck">
   <div class="state-chips">
@@ -536,7 +517,7 @@ a.tbtn{display:inline-block}
     <nav class="crumb" aria-label="breadcrumb"><a href="#">Home</a> &rsaquo; <a href="#">Bags</a> &rsaquo; <a href="#">Coolers</a> &rsaquo; 12 Can Lakeside Cooler Bag</nav>
 
     <div class="pdp-grid">
-      <!-- ================= LEFT COLUMN (Y1: `display:contents` on mobile so children take the production order) ================= -->
+      <!-- ================= LEFT COLUMN (display:contents on mobile so children take the production order) ================= -->
       <div class="col-left">
         <div class="gallery">
           <div class="gal-main">
@@ -624,11 +605,9 @@ a.tbtn{display:inline-block}
             </div>
           </details>
 
-          <!-- ======== NEW §4.5 — Delivery block replaces "Production & Shipping".
-               Same accordion idiom: h2 + 13px summary that carries the selected option's ship date.
-               Body: production line for the selected option → ZIP estimator → options table → footnote. ======== -->
+          <!-- ======== Delivery block (v2.3 §4.5, kept). Spec §4.4: the header follows the mode; timeline row 4 is generated from this table. ======== -->
           <details class="acc" id="deliveryBlock" open>
-            <summary><h2>Delivery</h2><span class="sum" id="dlvSum"></span><span class="chev" aria-hidden="true"></span><button class="tbtn dlv-tease" id="dlvTease" type="button" hidden></button></summary>
+            <summary><h2>Delivery</h2><span class="sum" id="dlvSum"></span><span class="chev" aria-hidden="true"></span></summary>
             <div class="acc-body">
               <p class="dlv-prod" id="dlvProd"></p>
               <div class="zip">
@@ -668,19 +647,44 @@ a.tbtn{display:inline-block}
         </div>
       </div>
 
-      <!-- ================= RIGHT COLUMN — BUY BOX (Y1: title block and setup block are separate mobile-order items) ================= -->
+      <!-- ================= RIGHT COLUMN — BUY BOX (title block and setup block are separate mobile-order items) ================= -->
       <div class="buybox col-right">
         <div class="bb-title">
           <p class="bb-sku">SKU: SVR0000106</p>
           <h1 class="bb-h1">12 Can Lakeside Cooler Bag</h1>
-          <!-- §4.5 (4) / X19: production's yellow filled "RUSH ORDER" image badge carried as a text badge; scrolls to and focuses the selector -->
-          <div class="bb-badges" id="badgeRow"><button class="badge-btn" id="rushBadge" type="button"><span class="badge-rush">24-Hour Rush available</span></button></div>
+          <!-- ======== NEW spec §3.3 — compact production-speed toggle in the tag slot (replaces the "RUSH ORDER" badge).
+               role=radiogroup "Production speed"; two role=radio buttons; arrow keys move; absent on no-rush products. ======== -->
+          <div class="mode" id="modeCtl" role="radiogroup" aria-label="Production speed">
+            <button class="seg std" type="button" role="radio" aria-checked="true" data-mode="std" id="segStd"><span class="t">Standard</span><span class="s">Ships as soon as <span class="nw" id="segStdDate"></span></span></button>
+            <button class="seg rush" type="button" role="radio" aria-checked="false" data-mode="rush" id="segRush" tabindex="-1"><span class="t"><span class="ico" aria-hidden="true">&#9201;</span>24-Hour Rush<span class="ck" aria-hidden="true">&#10003;</span></span><span class="s">Ships <span class="nw" id="segRushDate"></span> &middot; <span class="nw">+$39.00</span></span></button>
+          </div>
           <p class="bb-tag">Ideal for travel, trade shows, and employee kits.</p>
           <p class="bb-desc">This 12-can cooler bag is made from rugged 600 denier heather polyester. Your logo can be embroidered, screen printed, or heat transferred onto the front or back.</p>
         </div>
 
         <div class="bb-setup">
-          <!-- ---- steps 1–2 (production, unchanged) ---- -->
+          <!-- ======== NEW spec §3.4 — "How 24-Hour Rush works" collapsible, directly under the toggle, Rush only; open on first selection ======== -->
+          <details class="how" id="howBlock" hidden>
+            <summary id="howSum" aria-controls="howBody" aria-expanded="true">
+              <span class="st"><span>How 24-Hour Rush works</span><span class="chev" aria-hidden="true"></span></span>
+              <span class="sm">Your 24 hours start at checkout with artwork, not after a digital proof. Ships the next business day.</span>
+            </summary>
+            <div id="howBody">
+              <ol class="tl" aria-label="How 24-Hour Rush works, step by step">
+                <li><span class="n" aria-hidden="true">1</span><span class="d" id="tl1d"></span><span class="w">You check out, artwork attached now or later<small id="tl1note" hidden>Today&rsquo;s cutoff has passed</small></span></li>
+                <li><span class="n" aria-hidden="true">2</span><span class="d">Same business day</span><span class="w">Production starts on the default imprint, no digital proof to approve</span></li>
+                <li><span class="n" aria-hidden="true">3</span><span class="d" id="tl3d"></span><span class="w">Your order ships</span></li>
+                <li><span class="n" aria-hidden="true">4</span><span class="d" id="tl4d"></span><span class="w">Earliest arrival, with Overnight shipping<small>Other shipping options and prices are shown at checkout</small></span></li>
+                <li class="rule">Most 24-hour rush services start counting after you approve a digital proof. <b>Ours starts the business day you check out with artwork.</b></li>
+                <li class="rule">Artwork can follow after checkout. Production and your 24 hours start once we have both.</li>
+              </ol>
+            </div>
+          </details>
+
+          <!-- ======== NEW spec §6 — visible status line after the toggle returns to Standard (copy deck row 35) ======== -->
+          <p class="status-line" id="statusLine" role="status" hidden><span class="ck" aria-hidden="true">&#10003;</span><span id="statusText"></span></p>
+
+          <!-- ---- steps 1–2 (production, unchanged; shown under Standard before Customize and always under Rush) ---- -->
           <div id="stepsTop">
             <h2 class="stephd"><span class="n" aria-hidden="true">1</span>Colors</h2>
             <fieldset style="border:0;padding:0;margin:0 0 4px" aria-label="Colors">
@@ -696,96 +700,72 @@ a.tbtn{display:inline-block}
             </div>
           </div>
 
-          <!-- ---- steps 3–4 (production configurator; §4.4 reconfigures it under Rush) ---- -->
+          <!-- ---- steps 3–4: production configurator (Standard only — spec §4.1 "Customize step and configurator exactly as production") ---- -->
           <div id="stepsWizard" hidden>
             <div class="recap"><p><span class="n" aria-hidden="true">1&ndash;2</span><b id="recapColor">Navy Heather</b> &middot; <span id="recapQty">20</span> pieces</p><button class="tbtn" id="recapEdit" type="button">Edit color &amp; quantity</button></div>
 
             <h2 class="stephd" id="step3Head"><span class="n" aria-hidden="true">3</span>Decoration Method</h2>
-            <!-- Y2 mirror at the top of step 3; Y4 visible status after Switch to Standard / Undo -->
-            <div class="notice step3" id="step3Notice" role="status" hidden><p id="step3NoticeText"></p><button class="nx" type="button" aria-label="Dismiss" data-dismiss>&times;</button></div>
-            <p class="status-line" id="step3Status" role="status" hidden></p>
-            <!-- Standard: production radiogroup (three cards, descriptions verbatim) -->
             <div class="methcards" id="methCards" role="radiogroup" aria-label="Decoration method">
               <button type="button" role="radio" class="card" data-m="emb"><span class="nm">Embroidery</span><span class="pill">Full Color</span><span class="ds">Your design stitched in colored thread directly into the fabric, leaving a raised, textured mark with the soft sheen and dimensionality of real stitching.</span></button>
               <button type="button" role="radio" class="card" data-m="silk"><span class="nm">Silkscreen</span><span class="pill">Max 6 colors</span><span class="ds">Ink pushed through a mesh stencil onto the surface, leaving crisp, opaque color artwork that sits right on top of the material.</span></button>
               <button type="button" role="radio" class="card" data-m="heat"><span class="nm">Heat Transfer</span><span class="pill">Max 4 colors</span><span class="ds">Spot-color artwork printed in premixed solid inks onto a film, then heat-bonded to the surface as a smooth, thin applied layer that flexes with the material.</span></button>
             </div>
-            <!-- NEW §4.4: under Rush the radiogroup is replaced by one read-only card (copy deck "Locked method card") -->
-            <div id="methLocked" hidden style="margin-bottom:16px">
-              <div class="card on locked" aria-describedby="methLockedHelp"><span class="nm">Embroidery</span><span class="pill">Full Color</span><span class="pill muted">Rush default</span></div>
-              <p id="methLockedHelp" style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5"><button class="tbtn" id="switchStd" type="button">Switch to Standard</button> to choose another method.</p>
-            </div>
-
             <details class="disc"><summary>Will It Work For My Artwork?<span class="chev" aria-hidden="true"></span></summary><div class="db">Vector artwork (AI, EPS, PDF, SVG) reproduces best. Fine text below 0.25" and thin lines may fill in with thread.</div></details>
             <button class="howlink" type="button" id="howLink">How Embroidery works</button>
-            <div class="notebox" id="methNote"><span class="ck okg" aria-hidden="true">&#10003;</span><p><strong>First imprint free</strong> &mdash; full color, one location, one-time setup $12.50 applies.<span class="sub" id="methNoteSub">Add locations below &mdash; extras are priced separately.</span></p></div>
+            <div class="notebox" id="methNote"><span class="ck okg" aria-hidden="true">&#10003;</span><p><strong>First imprint free</strong> &mdash; full color, one location, one-time setup $12.50 applies.<span class="sub">Add locations below &mdash; extras are priced separately.</span></p></div>
             <div class="chgbox"><table class="chg"><thead><tr><th scope="col">Decoration Charges</th><th scope="col">Setup</th><th scope="col">Run Charge</th></tr></thead><tbody id="chgBody"></tbody></table></div>
 
             <h2 class="stephd"><span class="n" aria-hidden="true">4</span>Imprint Details</h2>
             <div class="imp">
-              <div class="upl-row">
-                <!-- Standard: production text-button. Rush: primary-styled (solid navy) button, copy deck "Upload button (rush)" -->
-                <button class="tbtn" id="uplStd" type="button">Upload artwork and instructions (optional)</button>
-                <button class="btn-2" id="uplRush" type="button" hidden>Upload artwork &mdash; starts your Rush clock at checkout</button>
-              </div>
-              <p class="recv" id="uplRecv" hidden aria-live="polite"></p>
+              <div class="upl-row"><button class="tbtn" id="uplStd" type="button">Upload artwork and instructions (optional)</button></div>
+              <p class="recv" id="uplRecvStd" hidden aria-live="polite"></p>
               <div style="margin-top:12px">
-                <label class="lab" for="locSel" id="locLab">Imprint location</label>
+                <label class="lab" for="locSel">Imprint location</label>
                 <select id="locSel"><option value="Front Pocket">Front Pocket</option><option value="Flap">Flap</option></select>
-                <!-- NEW §4.4: location as plain text under Rush (B-PDP042) -->
-                <p class="plain" id="locPlain" hidden>Front Pocket</p>
               </div>
               <div class="row">
                 <div><span class="lab">Imprint Colors</span><span class="plain" id="impColors">Full Color</span></div>
                 <div class="cost">Imprint #1 cost: <b id="impCost">$12.50</b> <button class="info-i" type="button" aria-label="How the imprint #1 cost is made up" title="Imprint Method Setup $12.50 · Imprint Method Run Charge Free">i</button></div>
               </div>
             </div>
-            <div class="addloc" id="addLocWrap"><button class="tbtn" type="button" id="addLoc">+ Add another imprint location</button></div>
+            <div class="addloc"><button class="tbtn" type="button" id="addLoc">+ Add another imprint location</button></div>
           </div>
 
-          <!-- ======== NEW §4.3 — Production & delivery selector (replaces the "Rush service" checkbox row;
-               same slot: between the quantity/configurator and the Subtotal). Persists across steps 1–2 and 3–4. ======== -->
-          <div class="pd" id="pdSel">
-            <h3 class="pd-h" id="pdHeading">Production &amp; delivery</h3>
-            <fieldset role="radiogroup" aria-labelledby="pdHeading">
-              <!-- X3: radio name = tier + fee + dates; X12: label and timeline are siblings inside the card div -->
-              <div class="opt on" id="optStd">
-                <label for="rStd">
-                  <span class="top"><input type="radio" name="tier" id="rStd" value="standard" checked aria-labelledby="stdName stdFee stdDates" aria-describedby="stdHelp"><span class="tier-nm" id="stdName">Standard</span><span class="fee" id="stdFee">included</span></span>
-                  <span class="dates" id="stdDates"></span>
-                  <span class="help" id="stdHelp">Free digital proof first &mdash; production starts after you approve</span>
-                </label>
-              </div>
-              <div class="opt" id="optRush">
-                <label for="rRush">
-                  <span class="top"><input type="radio" name="tier" id="rRush" value="rush" aria-expanded="false" aria-controls="rushTimeline" aria-labelledby="rushName rushFee rushDates" aria-describedby="rushHelp"><span class="tier-nm" id="rushName">24-Hour Rush</span><span class="fee" id="rushFee">+$39.00</span></span>
-                  <span class="dates" id="rushDates"></span>
-                  <span class="help" id="rushHelp">No proof round &middot; default imprint only</span>
-                </label>
-                <!-- Y2: visible notice when Rush replaced a chosen method / location -->
-                <div class="notice" id="rushNotice" role="status" hidden><p id="rushNoticeText"></p><button class="nx" type="button" aria-label="Dismiss" data-dismiss>&times;</button></div>
-                <!-- the card expands into the timeline (§4.3 "What happens next"); X4: persistent countdown span -->
-                <div class="tl" id="rushTimeline" role="region" aria-label="What happens next" hidden>
-                  <h3>What happens next</h3>
-                  <ol>
-                    <li><span id="tl1"></span> <span class="cd" id="tl1Cd" aria-live="polite"></span></li>
-                    <li id="tl2"></li>
-                    <li id="tl3"></li>
-                    <li id="tl4"></li>
-                  </ol>
-                  <p class="ln" id="tlArt"></p>
-                  <p class="ln">Most suppliers start a &ldquo;24-hour&rdquo; clock only after you approve a proof.</p>
-                </div>
-              </div>
-            </fieldset>
-          </div>
-          <!-- NEW §4.3 non-rush products: one line, no cards (B-PDP042) -->
-          <p class="pd-line" id="pdLine" hidden></p>
-          <p class="pd-link"><a class="tbtn" href="#deliveryBlock" id="dlvLink">Delivery options and exact dates for your ZIP &darr;</a></p>
+          <!-- ======== NEW spec §4.2 — Rush one-pager, steps 3–4 pre-filled (no Customize button, no method radios, no location combobox) ======== -->
+          <div id="rushPager" hidden>
+            <h2 class="stephd"><span class="n" aria-hidden="true">3</span>Decoration Method</h2>
+            <!-- copy deck rows 21–22: one amber notice under the heading carries the locked imprint and names Standard as the exit -->
+            <p class="amber" id="amberNotice" role="status"></p>
+            <!-- production method card: name + "Full Color" pill + description + "How Embroidery works" (S4: no "Will It Work") -->
+            <div class="mcard">
+              <span class="nm">Embroidery</span><span class="pill">Full Color</span>
+              <p>Your logo is stitched directly into the fabric for a raised, textured mark that holds up to daily use.</p>
+              <button class="tbtn" type="button" id="howLinkRush">How Embroidery works</button>
+            </div>
 
-          <!-- subtotal — production; NEW: "Rush fee (once per order)" line above the total (§4.3 fee display) -->
+            <h2 class="stephd"><span class="n" aria-hidden="true">4</span>Imprint Details</h2>
+            <div class="rows">
+              <div>Imprint location: <b>Front Pocket</b></div>
+              <div>Imprint colors: <b>Full Color</b></div>
+              <div>Imprint #1 cost: <b>$12.50</b> <button class="info-i" type="button" aria-label="How the imprint #1 cost is made up" title="Imprint Method Setup $12.50 · Imprint Method Run Charge Free">i</button></div>
+            </div>
+            <!-- S6: secondary upload CTA (48px navy outline, 16/700, glyph) + sidenote (copy deck row 25); received state = button label + Change + sidenote (row 28 adapted) -->
+            <div id="uplRushWrap">
+              <button class="btn-2 upl" id="uplRush" type="button"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M9 12V3M5.5 6.5 9 3l3.5 3.5M3 12v3h12v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Upload artwork and instructions</button>
+              <p class="side">Upload now or after checkout. Production, and your 24 hours, start once we have both your order and your file.</p>
+            </div>
+            <div id="uplRecvWrap" hidden>
+              <button class="btn-2 upl" id="uplRecvBtn" type="button"><span class="ok" aria-hidden="true">&#10003;</span><span id="uplRecvLbl">Artwork received &middot; logo.ai</span></button>
+              <div class="chg-row"><button class="tbtn" id="uplChange" type="button">Change</button></div>
+              <p class="side" role="status">Your 24 hours start at checkout.</p>
+            </div>
+          </div>
+
+          <!-- copy deck row 31: fee line above the subtotal, Rush only -->
+          <div class="fee" id="feeLine" hidden><span>Rush fee (once per order)</span><span>$39.00</span></div>
+
+          <!-- subtotal — production -->
           <div class="subtotal" id="subtotal">
-            <div class="r fee" id="feeLine" hidden><span>Rush fee (once per order)</span><span id="feeAmt">$39.00</span></div>
             <div class="r"><span class="k">Subtotal:</span><span class="amt" id="subAmt">$447.30</span></div>
             <div class="r sm"><span id="subPieces" aria-live="polite">20 pieces</span><span id="subEach">Price each: $21.74</span></div>
             <button class="tbtn" id="brkBtn" type="button" style="margin-top:6px">See price breakdown</button>
@@ -827,17 +807,17 @@ a.tbtn{display:inline-block}
   </footer>
 </div>
 
-<!-- §4.8 mobile: sticky CTA bar with the compact rush line -->
+<!-- spec §5 mobile: sticky bar — yellow strip (Rush only) + subtotal + the mode's CTA (copy deck row 33) -->
 <div class="mobile-bar" id="mobileBar">
-  <div class="line"><span id="mbLine"></span><span class="tot">Subtotal <b id="mbTot"></b></span></div>
-  <button class="go" id="mbGo" type="button">Customize Your Product</button>
+  <div class="strip" id="mbStrip" hidden><span class="ico" aria-hidden="true">&#9201;</span> 24-Hour Rush &middot; ships <span class="nw" id="mbShip"></span></div>
+  <div class="row"><div class="tot"><span>Subtotal <b id="mbTot"></b></span><small id="mbIncl" hidden>incl. Rush fee</small></div><button class="go" id="mbGo" type="button">Customize Your Product</button></div>
 </div>
 <button class="olark" id="olark" type="button">&#9679; Chat</button>
 
 <!-- ============================================================
      DIALOGS — one shell (react-modal idiom: white, 600px, 4px), focus trap + Escape
      ============================================================ -->
-<!-- Upload dialog — production "Sending us artwork — Front Pocket"; lead copy switches with the tier (§4.4) -->
+<!-- Upload dialog — production "Sending us artwork — Front Pocket"; Rush lead = copy deck row 27 -->
 <div class="back" id="backUpl">
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="uplTitle" tabindex="-1" id="dlgUpl">
     <div class="dlg-h"><h2 id="uplTitle">Sending us artwork &mdash; Front Pocket</h2><button class="dlg-x" type="button" aria-label="Close" data-close="upl">&times;</button></div>
@@ -854,14 +834,15 @@ a.tbtn{display:inline-block}
         </div>
       </div>
       <div class="filerow" id="fileRow" hidden><span><b id="fileName"></b><span class="meta" id="fileMeta"></span></span><button class="tbtn" type="button" id="fileRemove">Remove</button></div>
-      <div class="band amber" id="lowRes" hidden>This file may print soft at imprint size. Continue with Rush, or <button class="tbtn" type="button" id="lowResSwitch">switch to Standard</button> for a free proof.</div>
+      <!-- copy deck row 29: non-blocking low-res warning (Rush only) -->
+      <div class="band amber" id="lowRes" role="status" hidden>This file may print soft at imprint size. Under Rush it prints as uploaded; Standard includes a free digital proof.</div>
       <div class="instr"><label for="instrTa">Instructions (optional)</label><textarea id="instrTa" placeholder="Thread colors, placement notes, PMS numbers&hellip;"></textarea></div>
     </div>
     <div class="dlg-f"><button class="btn-2" type="button" data-close="upl">Cancel</button><button class="btn-2" type="button" id="uplDone">Done</button></div>
   </div>
 </div>
 
-<!-- Price breakdown — production dialog lines + the rush fee next to Imprint Method Setup (§4.3) -->
+<!-- Price breakdown — production dialog lines + the rush fee line -->
 <div class="back" id="backBrk">
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="brkTitle" tabindex="-1" id="dlgBrk">
     <div class="dlg-h"><h2 id="brkTitle">Price breakdown</h2><button class="dlg-x" type="button" aria-label="Close" data-close="brk">&times;</button></div>
@@ -870,13 +851,12 @@ a.tbtn{display:inline-block}
   </div>
 </div>
 
-<!-- Added to cart — confirmation panel (brief; B-PDP037: confirm, then 2–3 next steps). §4.6 cart page is out of scope. -->
+<!-- Added to cart — confirmation panel (B-PDP037: confirm, then next steps); copy deck rows 36–37 -->
 <div class="back" id="backConf">
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="confTitle" tabindex="-1" id="dlgConf">
     <div class="dlg-h"><h2 id="confTitle" class="conf-ok"><span class="ck" aria-hidden="true">&#10003;</span>Added to cart</h2><button class="dlg-x" type="button" aria-label="Close" data-close="conf">&times;</button></div>
     <div class="dlg-b">
-      <!-- X8: prominent no-artwork band at the top (spec §4.9 "Added-to-cart panel, no artwork") -->
-      <div class="conf-band" id="confBand" hidden><p>Upload artwork now &mdash; your Rush clock starts when we receive it.</p><button class="btn-2" type="button" id="confUpload">Upload artwork</button></div>
+      <div class="conf-band" id="confBand" hidden><p>Your 24 hours start when we have your artwork.</p><button class="btn-2" type="button" id="confUpload">Upload artwork</button></div>
       <div class="conf-prod"><img id="confImg" alt=""><div><div class="nm">12 Can Lakeside Cooler Bag</div><div class="cf" id="confCfg"></div></div></div>
       <ul class="conf-lines" id="confLines"></ul>
     </div>
@@ -921,15 +901,15 @@ a.tbtn{display:inline-block}
 
 <script>
 /* ============================================================
-   STATE MACHINE — one S object, one renderAll(); controls mutate S then re-render.
+   STATE MACHINE — one S object, one renderAll(); controls mutate S then re-render in place (no innerHTML on the
+   control or the buy-box wrappers, so focus never moves and nothing scrolls — lessons F4/F7).
    ============================================================ */
 var D = JSON.parse(document.getElementById('productData').textContent);
 var S;
 function initial(){
-  return { product:'rush', clock:'before', artwork:null, tier:'standard', cfgOpen:false,
-           method:'emb', loc:'Front Pocket', prevMethod:null, prevLoc:null,
-           color:0, qty:20, zip:D.zip, zipApplied:true, added:false, gal:0,
-           notice:null, step3Status:'' };   /* X7: geo ZIP applied on load; Y2 notice = the replaced choice; Y4 status line */
+  return { product:'rush', clock:'before', artwork:null, mode:'std', cfgOpen:false,
+           method:'emb', loc:'Front Pocket', color:0, qty:20, zip:D.zip, zipApplied:true, gal:0,
+           howOpen:true, status:'' };
 }
 S = initial();
 var openedAt = Date.now();   /* simulated clock advances in real time from the chosen chip */
@@ -940,8 +920,9 @@ function show(el,on){ if(!el) return; if(on) el.removeAttribute('hidden'); else 
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('on');},2600); }
 function announce(m){ $('live').textContent = m; }
+function isRush(){ return S.product==='rush' && S.mode==='rush'; }
 
-/* ---------- business-day calendar (Mon–Fri, no holidays in range — brief) ---------- */
+/* ---------- business-day calendar (Mon–Fri, no holidays in range) ---------- */
 function isBiz(d){ var w=d.getDay(); return w!==0 && w!==6; }
 function addBiz(d,n){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),12); while(!isBiz(x)) x.setDate(x.getDate()+1); while(n>0){ x.setDate(x.getDate()+1); if(isBiz(x)) n--; } return x; }
 function lab(d){ return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
@@ -955,28 +936,11 @@ function calc(){
   var rushShip = addBiz(start, D.rush.days);
   var stdShip = addBiz(today, D.standard.proofDays + D.standard.productionDays);
   var minsLeft = before ? Math.max(0, Math.round((cutoff - now)/60000)) : null;
-  function arr(ship,n){ return addBiz(ship,n); }
-  return {
-    before:before, minsLeft:minsLeft, startDay:start,
-    rushShip:rushShip, rushOvn:arr(rushShip,1), rush2:arr(rushShip,2),
-    stdShip:stdShip, stdOvn:arr(stdShip,1), std2:arr(stdShip,2),
-    ship:function(t){ return t==='rush' ? rushShip : stdShip; }
-  };
+  return { before:before, minsLeft:minsLeft, startDay:start, rushShip:rushShip, rushOvn:addBiz(rushShip,1), stdShip:stdShip, stdOvn:addBiz(stdShip,1) };
 }
-function cd(m){ return m>=60 ? Math.floor(m/60)+'h '+(m%60)+'m' : m+'m'; }
-/* X13: every date / time token is a no-wrap span */
+/* every date / time token is a no-wrap span (lessons: dates never wrap mid-token) */
 function dt(d){ return '<span class="nw">'+lab(d)+'</span>'; }
-function dtb(d){ return '<b class="nw">'+lab(d)+'</b>'; }
-/* X1: the one cutoff phrase — before cutoff "by 12:00 PM CT today", after "by 12:00 PM CT Thu, Sep 10" */
-function cutoffPhrase(c){ return 'by <span class="nw">'+D.rush.cutoffLabel+'</span> '+(c.before ? 'today' : dt(c.startDay)); }
-/* Y5: no-artwork two-line conditional — condition bold, date regular; line 2 is the next-cutoff fallback */
-function condLines(c){
-  var nextCutoff = addBiz(c.startDay,1), nextShip = addBiz(nextCutoff, D.rush.days);
-  return ['<b>With artwork '+cutoffPhrase(c)+':</b> ships '+dt(c.rushShip),
-          '<b>By <span class="nw">'+D.rush.cutoffLabel+'</span> '+dt(nextCutoff)+':</b> ships '+dt(nextShip)];
-}
-function noArt(){ return isRush() && S.added && !S.artwork; }
-/* Y3: one date source — shipping rows for the current ZIP (Ground ≥ 2Day ≥ Overnight, always) */
+/* one data source for shipping rows (Ground ≥ 2Day ≥ Overnight); timeline row 4 = the Overnight row */
 function shipRows(ship){
   var rows=[];
   for(var i=0;i<D.shipping.length;i++){
@@ -986,21 +950,14 @@ function shipRows(ship){
   }
   return rows;
 }
-function step4Text(c){
-  var rows=shipRows(c.rushShip), ovn=rows[2], cheaper=rows.slice(0,2);
-  var pick = S.zipApplied ? cheaper.reduce(function(a,b){ return b.lo<a.lo ? b : a; }) : rows[1];   /* earliest cheaper option; tie → Ground (first) */
-  return 'Arrives as early as '+dtb(ovn.lo)+' with Overnight; '+pick.name+' lands '+dt(pick.lo)+(S.zipApplied ? ' for ZIP '+esc(S.zip) : '')+' &mdash; you choose shipping at checkout';
-}
 
 /* ---------- pricing ---------- */
 function unitFor(q){ var u=D.tiers[0][1]; for(var i=0;i<D.tiers.length;i++){ if(q>=D.tiers[i][0]) u=D.tiers[i][1]; } return u; }
 function price(){
-  var m=D.methods[S.method], unit=unitFor(S.qty), base=S.qty*unit, setup=m.setup;
-  var fee = (S.product==='rush' && S.tier==='rush') ? D.rush.fee : 0;
-  var total=base+setup+fee;
-  return {unit:unit, base:base, setup:setup, fee:fee, total:total, avg:total/S.qty, m:m};
+  var r=isRush(), m=D.methods[r?D.rush.method:S.method], unit=unitFor(S.qty), base=S.qty*unit, setup=m.setup;
+  var fee = r ? D.rush.fee : 0, total=base+setup+fee;
+  return {unit:unit, base:base, setup:setup, fee:fee, total:total, avg:total/S.qty, m:m, loc:r?D.rush.location:S.loc};
 }
-function isRush(){ return S.product==='rush' && S.tier==='rush'; }
 
 /* ============================================================
    RENDER
@@ -1028,121 +985,91 @@ function renderTier(){
   $('tierTable').querySelector('tbody').innerHTML=r1+'</tr>'+r2+'</tr>';
 }
 
-/* §4.3 selector, timeline, countdown */
-function renderSelector(c){
-  var rushOn = S.product==='rush';
-  show($('pdSel'), rushOn);
-  show($('pdLine'), !rushOn);
-  show($('badgeRow'), rushOn);
-  if(!rushOn){
-    $('pdLine').innerHTML = 'Ships '+dtb(c.stdShip)+' &middot; arrives as early as '+dt(c.stdOvn)+' &middot; free digital proof first.';
-    return;
-  }
-  var r = S.tier==='rush';
-  $('rStd').checked = !r; $('rRush').checked = r;
-  $('optStd').classList.toggle('on', !r); $('optRush').classList.toggle('on', r);
-  $('rRush').setAttribute('aria-expanded', r ? 'true' : 'false');
-  show($('rushTimeline'), r);
-  /* X13: "Ships <date> · arrives as early as <date>", breaking into two lines at ≤400px */
-  function datesLine(lead, ship, arr){ return lead+' '+dtb(ship)+'<span class="sep"> &middot; arrives as early as </span><span class="d2"><span class="d2lead">Arrives as early as </span>'+dt(arr)+'</span>'; }
-  $('stdDates').innerHTML = datesLine('Ships as soon as', c.stdShip, c.stdOvn);
-  /* Y5: conditional two-line form once added to cart without artwork (§4.4 Add to cart) */
-  if(noArt()){ var cl=condLines(c); $('rushDates').innerHTML = '<span class="cond">'+cl[0]+'</span><span class="cond">'+cl[1]+'</span>'; }
-  else
-    $('rushDates').innerHTML = datesLine('Ships', c.rushShip, c.rushOvn);
-  show($('rushHelp'), !r);
-  renderNotice();
-  /* timeline (copy deck verbatim); X15: prose body, dates + deadline + ship date bold ink */
-  var m = D.methods[D.rush.method];
-  $('tl1').innerHTML = 'Check out with your artwork <b>'+cutoffPhrase(c)+'</b>';
-  /* X4: persistent countdown span, content only */
-  var showCd = r && c.before && c.minsLeft!==null && c.minsLeft<60;
-  $('tl1Cd').innerHTML = showCd ? '&middot; <b>'+cd(c.minsLeft)+'</b> left for this date' : '';
-  $('tl2').innerHTML = 'Production starts the same business day &mdash; no proof to wait for or approve; we print your artwork as sent, using this item&rsquo;s default imprint ('+m.name+' &middot; '+D.rush.location+')';
-  if(noArt()){ var cl3=condLines(c); $('tl3').innerHTML = cl3[0]+'<br>'+cl3[1]; }
-  else $('tl3').innerHTML = 'Ships '+dtb(c.rushShip);
-  $('tl4').innerHTML = step4Text(c);   /* Y3 */
-  var art=$('tlArt');
-  if(S.artwork){ art.textContent='Artwork received — your clock starts at checkout.'; art.classList.add('recvd'); }
-  else { art.textContent='Artwork later? You can upload after checkout — your clock starts when we receive the file.'; art.classList.remove('recvd'); }
+/* spec §3.3 — the toggle: attributes only, the DOM is never replaced */
+function renderControl(c){
+  var rushOn = S.product==='rush', r = isRush();
+  show($('modeCtl'), rushOn);
+  if(!rushOn) return;
+  $('segStdDate').textContent = lab(c.stdShip);
+  $('segRushDate').textContent = lab(c.rushShip);
+  $('segStd').setAttribute('aria-checked', !r); $('segRush').setAttribute('aria-checked', r);
+  $('segStd').tabIndex = r ? -1 : 0; $('segRush').tabIndex = r ? 0 : -1;
+}
+/* spec §3.4 — the collapsible timeline; open state mirrors S.howOpen */
+function renderHow(c){
+  var r = isRush(), how=$('howBlock');
+  show(how, r);
+  if(!r) return;
+  if(how.open!==S.howOpen) how.open = S.howOpen;
+  $('howSum').setAttribute('aria-expanded', how.open ? 'true' : 'false');
+  var showCd = c.before && c.minsLeft!==null && c.minsLeft<60;   /* B-CHK036: countdown only under the hour */
+  $('tl1d').innerHTML = (c.before ? 'Today' : dt(c.startDay)) + ' by <span class="nw">'+D.rush.cutoffLabel+'</span>'
+    + (showCd ? '<span class="cd" aria-live="polite" id="tl1cd"> &middot; <span class="nw">'+c.minsLeft+' min left</span></span>' : '');   /* copy deck row 19; aria-live only while the countdown exists */
+  show($('tl1note'), !c.before);
+  $('tl3d').innerHTML = dt(c.rushShip);
+  $('tl4d').innerHTML = dt(shipRows(c.rushShip)[2].lo);   /* generated from the Delivery table's Overnight row for the current ZIP */
+}
+/* spec §6 — visible status line (Standard exit) */
+function renderStatus(){
+  var on = S.product==='rush' && S.mode==='std' && !!S.status;
+  show($('statusLine'), on);
+  $('statusText').innerHTML = on ? S.status : '';
 }
 
-/* §4.5 Delivery block */
+/* Delivery block (v2.3 §4.5): header follows the mode (spec §4.4, copy deck row 38) */
 function renderDelivery(c){
   var r = isRush();
-  $('dlvSum').innerHTML = r ? 'ships '+dt(c.rushShip)+' ('+D.rush.tier+' Rush)' : 'ships as soon as '+dt(c.stdShip);
-  if(noArt()){ var cl=condLines(c); $('dlvProd').innerHTML = '<b>'+D.rush.tier+' Rush:</b> 1 business day, no proof, default imprint.<br>'+cl[0]+'<br>'+cl[1]; }
-  else $('dlvProd').innerHTML = r
-    ? '<b>'+D.rush.tier+' Rush:</b> 1 business day, no proof, default imprint; checkout with artwork '+cutoffPhrase(c)+'.'
+  $('dlvSum').innerHTML = r ? 'Ships '+dt(c.rushShip)+' ('+D.rush.tier+' Rush)' : 'Ships as soon as '+dt(c.stdShip);
+  $('dlvProd').innerHTML = r
+    ? '<b>'+D.rush.tier+' Rush:</b> 1 business day, no digital proof, default imprint; check out with artwork by <span class="nw">'+D.rush.cutoffLabel+'</span> '+(c.before ? 'today' : dt(c.startDay))+'.'
     : '<b>Standard:</b> Free digital proof within 24 hours; 4 business days production after your approval.';
-  /* Y1(c): Standard-state teaser in the header */
-  var tease = S.product==='rush' && !r;
-  show($('dlvTease'), tease);
-  if(tease) $('dlvTease').innerHTML = D.rush.tier+' Rush available &mdash; ships '+dt(c.rushShip);
-  var ship = c.ship(r?'rush':'standard');
-  var rows=shipRows(ship), h='';
+  var rows=shipRows(r ? c.rushShip : c.stdShip), h='';
   for(var i=0;i<rows.length;i++){
     var o=rows[i], date = o.single ? dt(o.lo) : dt(o.lo)+' – '+dt(o.hi);
     h+='<tr><td class="oname">'+o.name+'</td><td>'+date+'</td><td class="rng">'+o.price+'</td></tr>';
   }
   $('dlvTable').querySelector('tbody').innerHTML=h;
-  /* X7: status with a Change link when a ZIP is applied */
   $('zipStatus').innerHTML = S.zipApplied ? 'Dates for ZIP '+esc(S.zip)+' &middot; <button class="tbtn" type="button" id="zipChange">Change</button>' : 'Enter your ZIP for one arrival date per option.';
   var zc=$('zipChange'); if(zc) zc.addEventListener('click', function(){ $('zipIn').focus(); $('zipIn').select(); });
   if(document.activeElement!==$('zipIn')) $('zipIn').value = S.zipApplied ? S.zip : '';
 }
 
-/* configurator, subtotal, CTA, mobile bar */
+/* buy box body, subtotal, CTA, mobile bar */
 function renderConfig(c){
-  var r = isRush(), p = price(), m = p.m;
-  show($('stepsTop'), !S.cfgOpen);
-  show($('stepsWizard'), S.cfgOpen);
+  var r = isRush(), p = price(), m = D.methods[S.method];
+  /* which blocks exist: Standard = production (steps 1–2, then the configurator after Customize); Rush = one-pager */
+  show($('stepsTop'), r || !S.cfgOpen);
+  show($('stepsWizard'), !r && S.cfgOpen);
+  show($('rushPager'), r);
+  show($('feeLine'), r);
   $('recapColor').textContent=D.colors[S.color][0]; $('recapQty').textContent=S.qty;
   $('qtyIn').value=S.qty; $('unitOut').value=usd(p.unit);
-  /* step 3 */
-  show($('methCards'), !r); show($('methLocked'), r);
+  /* Standard configurator (production) — method memory lives in S.method / S.loc and is never touched under Rush */
   var cards=$('methCards').querySelectorAll('.card');
-  for(var i=0;i<cards.length;i++){ var on=cards[i].getAttribute('data-m')===S.method; cards[i].classList.toggle('on',on); cards[i].setAttribute('aria-checked',on); }
+  for(var i=0;i<cards.length;i++){ var on=cards[i].getAttribute('data-m')===S.method; cards[i].classList.toggle('on',on); cards[i].setAttribute('aria-checked',on); cards[i].tabIndex = on ? 0 : -1; }
   $('howLink').textContent='How '+m.name+' works';
-  $('methNote').querySelector('p').innerHTML='<strong>First imprint free</strong> &mdash; '+m.note+(r?'':'<span class="sub">Add locations below &mdash; extras are priced separately.</span>');
-  $('chgBody').innerHTML='<tr><td>First Location</td><td>'+usd(m.setup)+'</td><td><span class="okg">Free</span></td></tr>'+
-    (r?'':'<tr><td>Extra Location</td><td>'+usd(m.extraSetup)+'</td><td>'+usd(m.extraRun)+' / item</td></tr>');
-  /* step 4 */
-  show($('uplStd'), !r); show($('uplRush'), r);
-  show($('uplRecv'), !!S.artwork);
-  if(S.artwork) $('uplRecv').innerHTML='<span class="fn">'+esc(S.artwork)+'</span> &middot; '+(r?'Received — your clock starts at checkout.':'Received.');
-  show($('locSel'), !r); show($('locPlain'), r);
-  $('locLab').setAttribute('for', r?'':'locSel'); $('locSel').value=S.loc; $('locPlain').textContent=S.loc;
-  $('impColors').textContent=m.colors; $('impCost').textContent=usd(m.setup);
-  show($('addLocWrap'), !r);
-  $('uplTitle').textContent='Sending us artwork — '+S.loc;
-  /* subtotal */
-  show($('feeLine'), p.fee>0); $('feeAmt').textContent=usd(p.fee);
+  $('methNote').querySelector('p').innerHTML='<strong>First imprint free</strong> &mdash; '+m.note+'<span class="sub">Add locations below &mdash; extras are priced separately.</span>';
+  $('chgBody').innerHTML='<tr><td>First Location</td><td>'+usd(m.setup)+'</td><td><span class="okg">Free</span></td></tr><tr><td>Extra Location</td><td>'+usd(m.extraSetup)+'</td><td>'+usd(m.extraRun)+' / item</td></tr>';
+  show($('uplRecvStd'), !!S.artwork);
+  if(S.artwork) $('uplRecvStd').innerHTML='<span class="fn">'+esc(S.artwork)+'</span> &middot; Received.';
+  $('locSel').value=S.loc; $('impColors').textContent=m.colors; $('impCost').textContent=usd(m.setup);
+  /* Rush one-pager: amber notice (rows 21–22) + upload state (rows 25 / 28) */
+  var rm = D.methods[D.rush.method];
+  var nonDefault = S.method!==D.rush.method || S.loc!==D.rush.location;
+  $('amberNotice').innerHTML = 'Rush uses this item&rsquo;s default imprint: '+rm.name+', '+D.rush.location+', '+rm.colors+'. Method and location can&rsquo;t be changed on a Rush order; a different setup is available under Standard, above.'
+    + (nonDefault ? ' Your '+esc(m.name)+', '+esc(S.loc)+' choice is set aside and comes back under Standard.' : '');
+  show($('uplRushWrap'), !S.artwork); show($('uplRecvWrap'), !!S.artwork);
+  if(S.artwork){ $('uplRecvLbl').innerHTML='Artwork received &middot; '+esc(S.artwork); $('uplRecvBtn').setAttribute('aria-label','Artwork received: '+S.artwork+'. Change file'); }
+  /* subtotal + CTA (copy deck row 32) */
   $('subAmt').textContent=usd(p.total); $('subPieces').textContent=S.qty+' pieces'; $('subEach').textContent='Price each: '+usd(p.unit);
-  var ctaLabel = S.cfgOpen ? 'Add to cart' : 'Customize Your Product';
+  var ctaLabel = r ? 'Add Rush order to cart' : (S.cfgOpen ? 'Add to cart' : 'Customize Your Product');
   $('ctaPrimary').textContent=ctaLabel; $('mbGo').textContent=ctaLabel;
-  /* mobile bar: compact rush line (§4.8) */
-  /* X20: one money format (+$39.00), ship date regular, subtotal amount bold; Y1(b): Standard-state teaser */
-  $('mbLine').innerHTML = r ? 'Ships '+dt(c.rushShip)+' &middot; +'+usd(D.rush.fee)
-    : 'Ships as soon as '+dt(c.stdShip)+(S.product==='rush' ? ' &middot; <button class="tbtn" type="button" id="mbTease">Need it sooner? Rush ships '+dt(c.rushShip)+'</button>' : '');
-  $('mbTot').textContent=usd(p.total);
-  /* Y2 mirror + Y4 status in step 3 */
-  show($('step3Status'), !!S.step3Status); $('step3Status').textContent=S.step3Status ? '✓ '+S.step3Status : ''; /* R4 (Y4): green tick idiom */
-  /* Y6: bar height → body padding + chat pill offset */
-  var bar=$('mobileBar'); document.documentElement.style.setProperty('--barh', (getComputedStyle(bar).display==='none' ? 0 : bar.offsetHeight)+'px');
+  /* mobile bar (copy deck row 33) */
+  show($('mbStrip'), r); $('mbShip').textContent=lab(c.rushShip);
+  $('mbTot').textContent=usd(p.total); show($('mbIncl'), r);
+  setBarH();
 }
-/* Y2: the notice (card + step-3 mirror) */
-function renderNotice(){
-  var n=S.notice, on = !!n && isRush();
-  show($('rushNotice'), on); show($('step3Notice'), on);
-  if(!on) return;
-  var parts=[], undo=[];
-  if(n.method!==D.rush.method){ parts.push('Your '+D.methods[n.method].name+' choice'); undo.push(D.methods[n.method].name); }
-  if(n.loc!==D.rush.location){ parts.push((parts.length?'your ':'Your ')+n.loc+' location'); undo.push(n.loc); }
-  var what = parts.join(' and ')+(parts.length>1?' were':' was')+' replaced.';
-  var html = 'Rush uses this item&rsquo;s default imprint &mdash; '+D.methods[D.rush.method].name+' &middot; '+D.rush.location+'. '+what+' <button class="tbtn" type="button" data-undo>Undo</button> (Standard + '+undo.join(' &middot; ')+').';
-  $('rushNoticeText').innerHTML=html; $('step3NoticeText').innerHTML=html;
-}
+function setBarH(){ var bar=$('mobileBar'); document.documentElement.style.setProperty('--barh', (getComputedStyle(bar).display==='none' ? 0 : bar.offsetHeight)+'px'); }
 function renderChips(){
   var chips=document.querySelectorAll('.chip[data-set]');
   for(var i=0;i<chips.length;i++){ var k=chips[i].getAttribute('data-set'), v=chips[i].getAttribute('data-val');
@@ -1150,50 +1077,30 @@ function renderChips(){
 }
 function renderAll(){
   var c=calc();
-  renderSwatches(); renderTier(); renderSelector(c); renderDelivery(c); renderConfig(c); renderChips();
+  renderSwatches(); renderTier(); renderControl(c); renderHow(c); renderStatus(); renderDelivery(c); renderConfig(c); renderChips();
 }
-/* countdown tick — only re-renders the countdown span when Rush is on and under the hour */
-setInterval(function(){ if(isRush()){ var c=calc(); if(c.before && c.minsLeft!==null && c.minsLeft<60) renderSelector(c); } }, 30000);
+/* countdown tick — only the countdown span changes, only under Rush and under the hour */
+setInterval(function(){ if(isRush()){ var c=calc(); if(c.before && c.minsLeft!==null && c.minsLeft<60){ var el=$('tl1cd'); if(el) el.innerHTML=' &middot; <span class="nw">'+c.minsLeft+' min left</span>'; } } }, 30000);
 
 /* ============================================================
    INTERACTIONS
    ============================================================ */
-function setTier(t, src){
-  if(S.tier===t) return;
-  S.tier=t; S.step3Status='';
-  if(t==='rush'){
-    S.prevMethod=S.method; S.prevLoc=S.loc;
-    /* Y2: remember what Rush replaces so the notice and Undo can restore it */
-    S.notice = (S.method!==D.rush.method || S.loc!==D.rush.location) ? {method:S.method, loc:S.loc} : null;
-    S.method=D.rush.method; S.loc=D.rush.location;
-  } else { if(S.prevMethod){ S.method=S.prevMethod; S.loc=S.prevLoc; S.prevMethod=null; } S.notice=null; }
-  S.added=false;
+/* spec §6 — the toggle is the only entry and exit; re-render in place, no scroll, method memory kept */
+function setMode(m){
+  if(S.mode===m) return;
+  var c=calc();
+  S.mode=m;
+  if(m==='rush'){ S.howOpen=true; S.status=''; announce(D.rush.tier+' Rush selected. Rush fee '+usd(D.rush.fee)+' added, ships '+lab(c.rushShip)+'.'); }
+  else { S.status='Standard selected. Free digital proof first, ships as soon as <span class="nw">'+lab(c.stdShip)+'</span>.'; announce('Standard selected. Free digital proof first, ships as soon as '+lab(c.stdShip)+'.'); }
   renderAll();
-  announce(t==='rush' ? D.rush.tier+' Rush selected. Rush fee '+usd(D.rush.fee)+' added.'+(S.notice?' Default imprint applied.':'') : 'Standard selected. Rush fee removed.');
 }
-/* Y4: after Switch to Standard / Undo — step 3 at the top, first method radio focused, visible status */
-function backToMethods(){
-  if(!S.cfgOpen) S.cfgOpen=true;
-  S.step3Status='Switched to Standard — choose a method.';
-  renderAll();
-  var head=$('step3Head'); window.scrollTo({top: head.getBoundingClientRect().top + window.pageYOffset - 8, behavior:'smooth'});
-  setTimeout(function(){ var sel=$('methCards').querySelector('.card[data-m="'+S.method+'"]')||$('methCards').querySelector('.card'); if(sel) sel.focus({preventScroll:true}); }, 350); /* R4: focus the restored method (Undo → Silkscreen), else the first */
-}
-$('rStd').addEventListener('change', function(){ if(this.checked) setTier('standard','pdp'); });
-$('rRush').addEventListener('change', function(){ if(this.checked) setTier('rush','pdp'); });
-$('switchStd').addEventListener('click', function(){ setTier('standard','configurator'); backToMethods(); });
-document.addEventListener('click', function(e){
-  var u=e.target.closest('[data-undo]'); if(u){ setTier('standard','undo'); backToMethods(); return; }
-  var x=e.target.closest('[data-dismiss]'); if(x){ S.notice=null; renderNotice(); return; }
-  var t=e.target.closest('#mbTease'); if(t){ goRush(); }
+$('modeCtl').addEventListener('click', function(e){ var b=e.target.closest('.seg'); if(!b) return; setMode(b.getAttribute('data-mode')); });
+$('modeCtl').addEventListener('keydown', function(e){
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft'&&e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
+  var next = S.mode==='rush' ? 'std' : 'rush';
+  setMode(next); $(next==='rush'?'segRush':'segStd').focus({preventScroll:true}); e.preventDefault();
 });
-function goRush(){
-  var el=$('pdSel'); el.scrollIntoView({block:'center',behavior:'smooth'});
-  setTimeout(function(){ $('rRush').focus({preventScroll:true}); }, 350);
-}
-$('rushBadge').addEventListener('click', goRush);
-$('dlvTease').addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); goRush(); });
-$('dlvLink').addEventListener('click', function(e){ e.preventDefault(); $('deliveryBlock').open=true; $('deliveryBlock').scrollIntoView({block:'start',behavior:'smooth'}); setTimeout(function(){ $('zipIn').focus(); },400); });
+$('howBlock').addEventListener('toggle', function(){ S.howOpen=this.open; $('howSum').setAttribute('aria-expanded', this.open ? 'true' : 'false'); });
 
 /* gallery / colors / tiers / qty */
 $('galThumbs').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; S.gal=+b.getAttribute('data-i'); renderGallery(); });
@@ -1201,37 +1108,38 @@ $('swatches').addEventListener('click', function(e){ var b=e.target.closest('.sw
 $('tierTable').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; S.qty=+b.getAttribute('data-q'); renderAll(); });
 $('qtyIn').addEventListener('change', function(){ var v=parseInt(this.value,10); if(!isNaN(v)&&v>=D.tiers[0][0]) S.qty=v; renderAll(); });
 
-/* configurator */
+/* configurator (Standard) and the Rush CTA */
 $('ctaPrimary').addEventListener('click', primaryAction);
 $('mbGo').addEventListener('click', primaryAction);
 function primaryAction(){
+  if(isRush()){ openConf(); return; }
   if(!S.cfgOpen){ S.cfgOpen=true; renderAll(); $('stepsWizard').scrollIntoView({block:'start',behavior:'smooth'}); return; }
-  S.added=true; renderAll(); openConf();
+  openConf();
 }
 $('recapEdit').addEventListener('click', function(){ S.cfgOpen=false; renderAll(); });
-$('methCards').addEventListener('click', function(e){ var b=e.target.closest('.card'); if(!b) return; S.method=b.getAttribute('data-m'); S.loc=D.locations[0]; S.step3Status=''; renderAll(); announce('Imprint location reset to '+S.loc+' for '+D.methods[S.method].name); });
+$('methCards').addEventListener('click', function(e){ var b=e.target.closest('.card'); if(!b) return; S.method=b.getAttribute('data-m'); S.loc=D.locations[0]; renderAll(); announce('Imprint location reset to '+S.loc+' for '+D.methods[S.method].name); });
 $('methCards').addEventListener('keydown', function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft'&&e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
   var keys=Object.keys(D.methods), i=keys.indexOf(S.method), n=(e.key==='ArrowRight'||e.key==='ArrowDown')?(i+1)%keys.length:(i+keys.length-1)%keys.length;
-  S.method=keys[n]; S.loc=D.locations[0]; renderAll(); $('methCards').querySelector('.card.on').focus(); e.preventDefault();
+  S.method=keys[n]; S.loc=D.locations[0]; renderAll(); $('methCards').querySelector('.card.on').focus({preventScroll:true}); e.preventDefault();
 });
 $('locSel').addEventListener('change', function(){ S.loc=this.value; renderAll(); });
 $('addLoc').addEventListener('click', function(){ toast('Production adds a second imprint block here — out of scope for this round.'); });
 $('howLink').addEventListener('click', function(){ toast('Production opens the method explainer here.'); });
+$('howLinkRush').addEventListener('click', function(){ toast('Production opens the method explainer here.'); });
 $('olark').addEventListener('click', function(){ toast('Olark chat widget placeholder.'); });
 
-/* ZIP estimator (§4.5) */
+/* ZIP estimator */
 function applyZip(){
   var v=$('zipIn').value.replace(/\D/g,'');
-  if(v.length===0){ S.zipApplied=false; renderAll(); announce('ZIP cleared. Arrival dates shown as ranges.'); return; }   /* X7: clearing returns the range table */
+  if(v.length===0){ S.zipApplied=false; renderAll(); announce('ZIP cleared. Arrival dates shown as ranges.'); return; }
   if(v.length!==5){ $('zipStatus').textContent='Enter a 5-digit ZIP.'; return; }
   S.zip=v; S.zipApplied=true; renderAll(); announce('Arrival dates updated for ZIP '+v);
-  /* Y8: 600 ms wash highlight on the rows */
   var trs=$('dlvTable').querySelectorAll('tbody tr');
   for(var i=0;i<trs.length;i++) trs[i].classList.add('flash');
   setTimeout(function(){ for(var i=0;i<trs.length;i++) trs[i].classList.remove('flash'); }, 600);
 }
-window.addEventListener('resize', function(){ var bar=$('mobileBar'); document.documentElement.style.setProperty('--barh', (getComputedStyle(bar).display==='none' ? 0 : bar.offsetHeight)+'px'); });
+window.addEventListener('resize', setBarH);
 $('zipGo').addEventListener('click', applyZip);
 $('zipIn').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); applyZip(); } });
 $('zipIn').addEventListener('change', applyZip);
@@ -1240,7 +1148,7 @@ $('zipIn').addEventListener('change', applyZip);
 document.querySelectorAll('.chip[data-set]').forEach(function(b){ b.addEventListener('click', function(){
   var k=b.getAttribute('data-set'), v=b.getAttribute('data-val');
   if(k==='artwork'){ S.artwork = v==='none' ? null : v; }
-  else if(k==='product'){ S.product=v; announce(''); if(v==='none'){ S.tier='standard'; if(S.prevMethod){S.method=S.prevMethod;S.loc=S.prevLoc;S.prevMethod=null;} } }   /* X11: clear the live region */
+  else if(k==='product'){ S.product=v; announce(''); if(v==='none'){ S.mode='std'; S.status=''; } }
   else { S[k]=v; openedAt=Date.now(); }
   renderAll();
 }); });
@@ -1260,7 +1168,7 @@ function closeD(){
   if(!openDlg) return;
   $('back'+openDlg).classList.remove('open'); document.body.style.overflow='';
   document.querySelector('.site').removeAttribute('aria-hidden');
-  openDlg=null; if(lastFocus&&lastFocus.focus) lastFocus.focus();
+  openDlg=null; if(lastFocus&&lastFocus.focus) lastFocus.focus({preventScroll:true});
 }
 document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', closeD); });
 document.querySelectorAll('.back').forEach(function(b){ b.addEventListener('mousedown', function(e){ if(e.target===this) closeD(); }); });
@@ -1277,34 +1185,37 @@ document.addEventListener('keydown', function(e){
   }
 });
 
-/* upload dialog (§4.4) */
+/* upload dialog — production "Sending us artwork — <location>"; Rush lead = copy deck row 27 */
 var pendingFile=null;
 function openUpload(){
+  var r=isRush();
   pendingFile=S.artwork;
-  $('uplLead').textContent = isRush()
-    ? 'Rush orders print exactly what you upload — no proof is sent. Vector files (AI, EPS, PDF, SVG) print sharpest. You can also upload after checkout; production starts when we have your file.'
+  $('uplTitle').textContent='Sending us artwork — '+(r ? D.rush.location : S.loc);
+  $('uplLead').textContent = r
+    ? 'Rush orders print the artwork you upload, without a digital proof. Vector files (AI, EPS, PDF, SVG) print sharpest. Uploading after checkout is fine; production and your 24 hours start once we have both your order and your file.'
     : 'You can upload art and instructions now, or after checkout. We e-mail a free digital proof before production starts.';
   show($('chooser'), false); renderFile(); openD('Upl');
 }
 function renderFile(){
   show($('fileRow'), !!pendingFile); show($('drop'), !pendingFile);
   if(pendingFile){ $('fileName').textContent=pendingFile; $('fileMeta').textContent = pendingFile==='logo.jpg' ? ' · raster 640×480 · 88 KB' : ' · vector · 214 KB'; }
-  show($('lowRes'), pendingFile==='logo.jpg' && isRush());
+  show($('lowRes'), pendingFile==='logo.jpg' && isRush());   /* copy deck row 29: non-blocking */
 }
 $('uplStd').addEventListener('click', openUpload);
 $('uplRush').addEventListener('click', openUpload);
+$('uplRecvBtn').addEventListener('click', openUpload);
+$('uplChange').addEventListener('click', openUpload);
 $('chooseBtn').addEventListener('click', function(){ show($('chooser'), true); $('chooser').querySelector('button').focus(); });
 $('chooser').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; pendingFile=b.getAttribute('data-file'); show($('chooser'), false); renderFile(); });
 $('fileRemove').addEventListener('click', function(){ pendingFile=null; renderFile(); });
-$('lowResSwitch').addEventListener('click', function(){ S.artwork=pendingFile; closeD(); setTier('standard','upload'); toast('Switched to Standard — a free digital proof comes first.'); });
-$('uplDone').addEventListener('click', function(){ S.artwork=pendingFile; closeD(); renderAll(); if(S.artwork) announce(S.artwork+' received'); });
+$('uplDone').addEventListener('click', function(){ S.artwork=pendingFile; closeD(); renderAll(); if(S.artwork) announce('Artwork received: '+S.artwork+(isRush()?'. Your 24 hours start at checkout.':'')); });
 
-/* price breakdown (§4.3, 4.4 "See price breakdown includes it") */
+/* price breakdown (production dialog lines + the fee) */
 $('brkBtn').addEventListener('click', function(){
   var p=price(), m=p.m, h='';
   h+='<div class="r"><span>Base Item Price</span><span>'+S.qty+' × '+usd(p.unit)+' = '+usd(p.base)+'</span></div>';
   h+='<div class="r lab"><span>Decoration method: '+esc(m.name)+'</span><span></span></div>';
-  h+='<div class="r lab"><span>Imprint 1 — '+esc(S.loc)+', '+esc(m.colors)+' '+esc(m.name)+'</span><span></span></div>';
+  h+='<div class="r lab"><span>Imprint 1 — '+esc(p.loc)+', '+esc(m.colors)+' '+esc(m.name)+'</span><span></span></div>';
   h+='<div class="r"><span>Imprint Method Setup</span><span>'+usd(p.setup)+'</span></div>';
   if(p.fee) h+='<div class="r"><span>Rush fee (once per order)</span><span>'+usd(p.fee)+'</span></div>';
   h+='<div class="r"><span>Imprint Method Run Charge</span><span>Free</span></div>';
@@ -1314,29 +1225,28 @@ $('brkBtn').addEventListener('click', function(){
   $('brkBody').innerHTML=h; openD('Brk');
 });
 
-/* added-to-cart confirmation panel */
+/* added-to-cart confirmation panel — copy deck rows 36–37; no-artwork Artwork row = two lines, condition bold (lessons F5) */
 function openConf(){
   var c=calc(), p=price(), r=isRush(), m=p.m, h='';
-  $('confCfg').textContent = D.colors[S.color][0]+' · '+S.qty+' pieces · '+m.name+' on '+S.loc+' · '+m.colors;
-  show($('confBand'), r && !S.artwork);   /* X8: band at the top when Rush has no artwork */
+  $('confCfg').textContent = D.colors[S.color][0]+' · '+S.qty+' pieces · '+m.name+' on '+p.loc+' · '+m.colors;
+  show($('confBand'), r && !S.artwork);
   if(r){
-    /* Y5: no-artwork two-line conditional; Delivery row without a fixed date */
-    var cl=condLines(c);
-    h+='<li><span class="k">Production</span>'+(S.artwork ? D.rush.tier+' Rush · ships '+dtb(c.rushShip) : D.rush.tier+' Rush<br>'+cl[0]+'<br>'+cl[1])+'</li>';
-    h+='<li><span class="k">Delivery</span>'+(S.artwork ? 'Arrives as early as '+dt(c.rushOvn)+' — shipping chosen at checkout' : 'Arrives as early as the day after shipping — shipping chosen at checkout')+'</li>';
+    h+='<li><span class="k">Production</span>'+D.rush.tier+' Rush &middot; ships '+dt(c.rushShip)+'</li>';
+    h+='<li><span class="k">Delivery</span>Arrives as early as '+dt(c.rushOvn)+' with Overnight &middot; shipping chosen at checkout</li>';
+    h+='<li><span class="k">Proof</span>None under Rush &middot; we print '+(S.artwork ? esc(S.artwork) : 'your artwork')+' as uploaded</li>';
+    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' received'
+        : '<span class="cond">Not uploaded yet</span><span class="cond"><b>needed by <span class="nw">'+D.rush.cutoffLabel+'</span> '+(c.before ? 'today' : dt(c.startDay))+'</b> to ship '+dt(c.rushShip)+'</span>')+'</li>';
     h+='<li class="fee"><span>Rush fee (once per order)</span><span>'+usd(p.fee)+'</span></li>';
-    h+='<li><span class="k">Proof</span>No proof — '+(S.artwork ? 'we print the artwork you uploaded ('+esc(S.artwork)+').' : 'we print your artwork as sent.')+'</li>';
-    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : 'Not uploaded yet')+'</li>';
   } else {
-    h+='<li><span class="k">Production</span>Standard · ships as soon as '+dt(c.stdShip)+' · arrives as early as '+dt(c.stdOvn)+'</li>';
-    h+='<li><span class="k">Proof</span>Free digital proof first — production starts after you approve.</li>';
-    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' · received' : 'Not uploaded yet — you can send it after checkout.')+'</li>';
+    h+='<li><span class="k">Production</span>Standard &middot; ships as soon as '+dt(c.stdShip)+' &middot; arrives as early as '+dt(c.stdOvn)+'</li>';
+    h+='<li><span class="k">Proof</span>Free digital proof first &mdash; production starts after you approve.</li>';
+    h+='<li><span class="k">Artwork</span>'+(S.artwork ? esc(S.artwork)+' received' : 'Not uploaded yet &mdash; you can send it after checkout.')+'</li>';
   }
   h+='<li class="fee"><span><b style="color:var(--ink)">Subtotal</b></span><span><b style="color:var(--ink)">'+usd(p.total)+'</b></span></li>';
   $('confLines').innerHTML=h;
   openD('Conf');
 }
-$('viewCart').addEventListener('click', function(){ toast('Cart page — out of scope for this prototype (spec §4.6).'); });
+$('viewCart').addEventListener('click', function(){ toast('Cart page — out of scope for this prototype.'); });
 $('confUpload').addEventListener('click', function(){ closeD(); openUpload(); });
 
 /* boot */
